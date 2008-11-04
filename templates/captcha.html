@@ -1,0 +1,11 @@
+{% load i18n %}
+{% load recaptcha %}
+{% autoescape off %}
+{% if captcha_msg %}
+{{msg}}
+{% endif %}
+<script type="text/javascript">
+var RecaptchaOptions = {theme : 'clean'};
+</script>
+{{ captcha }}
+{% endautoescape %}

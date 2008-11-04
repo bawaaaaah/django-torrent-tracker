@@ -1,0 +1,126 @@
+{% extends "users/auth.html" %}
+{%load i18n%}
+{% block title %}{{user.name}}@{{site_domain}}{% endblock %}
+{%block meta%}
+<script type="text/javascript" src="/admin/jsi18n/"></script>
+<script type="text/javascript" src="/media/js/core.js"></script>
+<script type="text/javascript" src="/media/js/calendar.js"></script>
+<script type="text/javascript" src="/media/js/admin/DateTimeShortcuts.js"></script>
+{%if user.image%}{%include "highslide.htm"%}{%endif%}
+<style>
+.calendarbox, .clockbox { margin:5px auto; font-size:11px; width:16em; text-align:center; background:white; position:relative; }
+.calendar { margin:0; padding: 0; }
+.calendar table { margin:0; padding:0; border-collapse:collapse; background:white; width:99%; }
+.calendar caption, .calendarbox h2 { margin: 0; font-size:11px; text-align:center; border-top:none; }
+.calendar th { font-size:10px; color:#666; padding:2px 3px; text-align:center; background:white url(/media/bgcode.gif) 0 50% repeat-x; border-bottom:1px solid #ddd; }
+.calendar td { font-size:11px; text-align: center; padding: 0; border-top:1px solid #eee; border-bottom:none; }
+.calendar td.selected a { background: #C9DBED; }
+.calendar td.nonday { background:#efefef; }
+.calendar td.today a { background:#ffc; }
+.calendar td a, .timelist a { display: block; font-weight:bold; padding:4px; text-decoration: none; color:#444; }
+.calendar td a:hover, .timelist a:hover { color:#F06; }
+.calendar td a:active, .timelist a:active { color:#F06; }
+.calendarnav { font-size:10px; text-align: center; color:#ccc; margin:0; padding:1px 3px; }
+.calendarnav a:link, #calendarnav a:visited, #calendarnav a:hover { color: #999; }
+.calendar-shortcuts { background:white; font-size:10px; line-height:11px; border-top:1px solid #eee; padding:3px 0 4px; color:#ccc; }
+.calendarbox .calendarnav-previous, .calendarbox .calendarnav-next { display:block; position:absolute; font-weight:bold; font-size:12px; padding:1px 4px 2px 4px; color:black; }
+.calendarnav-previous:hover, .calendarnav-next:hover { color:#F06; }
+.calendarnav-previous { top:0; left:0; }
+.calendarnav-next { top:0; right:0; }
+.calendar-cancel { margin:0 !important; padding:0; font-size:10px; background:#e1e1e1 url(/media/bgcode.gif) 0 50% repeat-x;  border-top:1px solid #ddd; }
+.calendar-cancel a { padding:2px; color:#999; }
+
+.vDateField {margin-right:2px;margin-left:4px;}
+table { border-collapse:collapse; border-color:#ccc; }
+td, th { font-size:11px; line-height:13px; border-bottom:1px solid #eee; vertical-align:top; padding:5px; font-family:"Lucida Grande", Verdana, Arial, sans-serif; }
+th { text-align:left; font-size:12px; font-weight:bold; }
+.module { border:1px solid #ccc; margin-bottom:5px; background:white; }
+.module p, .module ul, .module h3, .module h4, .module dl, .module pre { padding-left:10px; padding-right:10px; }
+.module blockquote { margin-left:12px; }
+.module ul, .module ol { margin-left:1.5em; }
+.module h3 { margin-top:.6em; }
+.module h2, .module caption { margin:0; padding:2px 5px 3px 5px; font-size:11px; text-align:left; font-weight:bold; color:black; }
+.module table { border-collapse: collapse; }
+.calendar-shortcuts a:link, .module a:visited { color: #F06; text-decoration:none; }
+.calendar-shortcuts a:hover { color: #444; border-bottom: 1px solid #F06;}
+.calendar caption, .calendarbox h2 { text-align:center;}
+a#calendarlink0 {border-bottom:0;}
+p.date span a {
+display:none;
+}
+p.date span a#calendarlink0 {
+display:inline !important;
+.date img {
+ border: 0;
+}
+}
+img {border: 0;}
+#id_text{width:21em;}
+</style>
+{%endblock%}
+{%block body%}<body id="account">{%endblock%}
+
+{% block content %}
+<h1>{{ user.name }}</h2>
+{%if user.image%}<p style="padding:1em 0 0 9em;float:left;display:inline;margin: 1em 1em 1em 0;" class="imageleft">
+<a class="highslide" href="/media/avatar/{{user.image}}" onclick="return hs.expand(this)">
+<img title="{{user.name}}" src="/media/iavatar/{{user.image}}"></a></p>{%endif%}
+<br><br><h3>{{ user.name }}</h3><br><br><br><br>
+<form action="/self/openid/" id="openidform" method="post" class="block">
+  <div class="row"><label for="id_openid_url">{{ openid.openid_url.label }}<b>:</b>
+  {% if openid.openid_url.errors %}<br><span class="error">{{ openid.openid_url.errors|join:", " }}</span>{% endif %}</label>
+  {{ openid.openid_url }}</div>
+  <input type="hidden" name="xhr" value="false">
+  <div class="row" style="margin-left:2px;"><br><label>&nbsp;</label><span class="button">
+  <span class="first-child"><button type="submit">{%trans "Write"%}</button></span></span></div>
+</form>
+
+<br><br>
+<form action="/self/personal/" method="POST" enctype="multipart/form-data">
+<div class="row"><label for="id_name">{%trans "Name"%}<b>:</b>
+{% if personal.name.errors %}<br><span class="error">{{ personal.name.errors|join:", " }}</span>{% endif %}</label>
+{{ personal.name }}</div>
+<div class="row"><br><label for="id_image">{%trans "Avatar"%}<b>:</b>
+{% if personal.image.errors %}<span class="error"><br>{{ form.image.errors|join:", " }}</span>{% endif %}</label>
+{{ personal.image }}</div>
+<div class="row"><br><label for="id_title">{%trans "Title"%}<b>:</b>
+{% if personal.title.errors %}<span class="error"><br>{{ personal.title.errors|join:", " }}</span>{% endif %}</label>
+{{ personal.title }}</div>
+<div class="row"><br><label for="id_birthday">{%trans "Birthday"%}<b>:</b>
+{% if personal.birthday.errors %}<br><span class="error">{{ personal.birthday.errors|join:", " }}</span>{% endif %}</label>
+{{ personal.birthday }}<span class="date"></span></div>
+<div class="row"><br><label for="id_im">{%trans "Instatnt messenger"%}<b>:</b>
+{% if personal.im.errors %}<br><span class="error">{{ personal.im.errors|join:", " }}</span>{% endif %}</label>
+{{ personal.im }}</div>
+<div class="row"><br><label for="id_text">{%trans "Profile"%}<b>:</b>
+{% if personal.text.errors %}(<span class="error">{{ personal.text.errors|join:", " }}</span>){%endif%}<br></label>
+{{ personal.text }}</div>
+<div class="row" style="margin-left:2px;"><br><label>&nbsp;</label><span class="button">
+<span class="first-child"><button type="submit">{%trans "Write"%}</button></span></span></div>
+</form>
+<br><br>
+{% if user.openid %}
+<form action="{% url users.views.read_hcard %}" method="post" id="hcard"><p>
+<div class="row" style="margin-left:2px;"><br><label>&nbsp;</label><span class="button">
+<span class="first-child"><button type="submit">{%trans "Read hCard"%}</button></span></span></div>
+</form>
+{% endif %}
+{% endblock %}
+{%block right%}
+<div id="rnote" class="rnote"><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+  <p class="meta"><a href="/chpw/">{%trans "Change the password"%}</a></p>
+  <!--<p class="meta"><a href="/homepage/">{%trans "Customize homepage"%}</a>--></p>
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div></div>
+{% endblock %}

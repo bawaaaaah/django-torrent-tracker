@@ -1,0 +1,13 @@
+{%extends "index.html"%}{%load i18n%}
+{%block content%}
+<h1>{% trans "Categories" %}</h1>
+{% load sections_list %}{% get_sectionslist %}
+<br/><br/>
+{% for k, v in cat_tree.items %}<p>
+<a title="{{v.1}} torrents" href="/sections/{{k}}/">{{v.1}}</a> ({{v.0}}) <a title="{{v.1}} torrents RSS" href="/feeds/rss/section/{{k}}/"><img style="border:0;" title="{{v.1}} torrents RSS" src="/media/blue-feed-i.png"></a>
+{%for sk, sv in v.2.items%}
+<br/>&nbsp;&nbsp;<a title="{{sv.0}}" href="/sections/{{sk}}/">{{sv.0}}</a> ({{sv.1}}) <a title="{{sv.0}} torrents RSS" href="/feeds/rss/section/{{sk}}/"><img style="border:0;" title="{{sv.0}} torrents RSS" src="/media/blue-feed-i.png"></a>
+{%endfor%}</p>
+{%endfor%}
+{%endblock%}
+{%block right%}{%endblock%}

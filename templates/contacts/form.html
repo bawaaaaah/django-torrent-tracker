@@ -1,0 +1,14 @@
+{%extends "index.html"%}
+{%load i18n%}
+{%block title%}e-mail{%endblock%}
+{%block body%}<body>{%endblock%}
+{%block content%}
+<form action="/contact/" method="POST">
+<div class="row"><label for="id_subject">{%trans "Subject"%}<b>:</b></label>{{form.subject}}</div>
+<div class="row"><label>&nbsp;</label>{{form.body}}</div>
+<div class="row"><label for="id_email">e-mail<b>:</b></label>{{form.email}}</div>
+<div class="row" style="margin-left:2px;"><br><br><label>&nbsp;</label><span class="button"><span class="first-child">
+<button type="submit">{%trans "Send"%}</button></span></span></div>
+</form>
+{%endblock%}
+{%block right%}{%endblock%}

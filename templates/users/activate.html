@@ -1,0 +1,15 @@
+{% extends "users/auth.html" %}
+{% load i18n %}
+{% block title %}{% trans "Account Activation" %}{% endblock %}
+{%block body%}<body class="login">{%endblock%}
+{%block login%}{%endblock%}{%block content%}
+<h2>{% trans "Account Activation" %}</h2>
+{% if account %}
+    <p>
+    {% trans "Thanks for signing up! You are now logged in." %}
+    {% blocktrans %}Now you can use email address for logging in.{% endblocktrans %}
+    </p>
+{%else%}
+    <p>{% blocktrans %}Either your activation link was <strong>incorrect</strong>, or the activation key for your account has expired. Activation keys are only valid for a few days after registration.{% endblocktrans %}</p>
+{%endif%}
+{%endblock%}

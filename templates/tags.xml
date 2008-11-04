@@ -1,0 +1,9 @@
+{%load logic%}<?xml version="1.0" encoding="UTF-8"?>
+<list>
+<msg>success</msg>
+{%if result.object_list%}
+{%for tag in result.object_list%}<tag n="{{tag.count}}">{{tag.name}}</tag>{%endfor%}
+{%endif%}
+<page>{{page}}</page>
+<pages>{{result.paginator.num_pages}}</pages>
+</list>

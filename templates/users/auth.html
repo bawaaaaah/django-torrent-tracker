@@ -1,0 +1,62 @@
+{%extends "index.html"%}
+{%load i18n%}
+{%block title%}{%trans "Logging in"%}{%endblock%}
+{%block meta%}
+<style type="text/css" media="screen">
+.left {
+width: 72%;
+}
+</style>
+{%endblock%}
+{%block search%}{%endblock%}
+{%block body%}<body id="auth">{%endblock%}
+
+{%block content%}
+{% if user.is_authenticated %}
+<br><a href="/logout/">{%trans "logout as"%} {{ user.profile|escape }}</a></p>
+{%else%}
+<p>{%trans "Specify OpenID or username with password to login"%}</p><br>
+<form action="/login/" method="post" name="openod_login"><fieldset>
+  {% if redirect %}<input type="hidden" name="redirect" value="{{ redirect|escape }}" />{% endif %}
+  <div class="row"><label for="id_openid_url">OpenID<b>:</b></label>
+  <input id="id_openid_url" type="text" maxlength="200" class="OpenIdLabel" name="openid_url"/><br></div>
+  {% if form.openid_url.errors %}<br><span class="error">{{ form.openid_url.errors|join:", " }}</span>{% endif %}
+  <div class="row"><br><label for="osubmit">&nbsp;</label><span class="button"><span class="first-child">
+  <button type="submit">{%trans "Login"%}</button></span></span></div>
+</fieldset></form>
+<br><br><br><br>
+<form action="/login/" method="post" name="login"><fieldset>
+  {% if redirect %}<input type="hidden" name="redirect" value="{{ redirect|escape }}" />{% endif %}
+  <div class="row"><label for="id_username">{%trans "Username"%}<b>:</b>
+  {%if form.username.errors%}<br><span class="error">{{form.username.errors}}</span><br>{%endif%}</label>
+  <input type="text" name="username" id="id_username" /><br><br></div>
+  <div class="row"><label for="id_password">{%trans "Password"%}<b>:</b>
+  {%if form.password.errors%}<br><span class="error">{{form.password.errors}}</span><br>{%endif%}</label>
+  <input type="password" name="password" id="id_password" /><br></div>  
+  <input type="hidden" name="this_is_the_login_form" value="1" />
+  <div class="row"><br><label for="submit">
+  &nbsp;{%if form.errors and not form.username.errors and not form.password.errors%}<span class="error">{{form.errors.values.0.0}}</span>{%endif%}
+  </label>
+  <span class="button"><span class="first-child"><button type="submit">{%trans "Login"%}</button></span></span>
+  </div>
+</fieldset></form>
+{%endif%}
+{%endblock%}
+{%block right%}
+<div class="rnote"><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+  <p><a href="/chpw/">{%trans "Change the password"%}</a></p>
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div></div>
+{%endblock%}
+{%block footer%}{%endblock%}

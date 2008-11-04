@@ -1,0 +1,24 @@
+{% extends "topic.html" %}
+{%load i18n%}
+{% block title %}{%trans "Comment"%}{% endblock %}
+{%block body%}<body>{%endblock%}
+{% block content %}
+<form action="/comments/postfreee/" method="POST">
+<fieldset style="margin-left: 18px;"><br>
+<p><label for="id_person_name">{%trans "Username"%}<b>:</b><br></label>{{ comment_form.person_name }}
+{% if comment_form.person_name.errors %}<span style="font-family:courier;color:red;">&lt;&mdash;</span>{% endif %}
+</p>
+<p><label for="id_comment">{% trans "Comment:" %}{% if comment_form.comment.errors %} (<span style="font-family:courier;color:red;">{%trans "Required field"%}</span>)<b>:</b>&nbsp;{%else%}<b>:</b>&nbsp;{% endif %}</label><br>
+{{ comment_form.comment }}
+</p>
+<input type="hidden" name="options" value="{{ options }}" />
+<input type="hidden" name="target" value="{{ target }}" />
+<input type="hidden" name="gonzo" value="{{ hash }}" />
+<input type="hidden" name="url" value="{{ request.url }}" />
+<p>
+<div class="row" style="margin-left:2px;"><br><br><label>&nbsp;</label><span class="button"><span class="first-child">
+<button type="submit">{%trans "Add comment"%}</button></span></span></div>
+</p>
+</fieldset>
+</form></div>
+{% endblock %}

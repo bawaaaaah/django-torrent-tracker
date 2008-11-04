@@ -1,0 +1,49 @@
+{% extends "users/auth.html" %}
+{%load i18n%}{%load logic%}
+{% block title %}{%trans "To"%}: {{rcpt.name}}{% endblock %}
+{%block meta%}
+<style type="text/css" media="screen">
+#id_body {width: 400px;}
+p.ro{
+ padding-top: 0.2em;
+ font-weight: normal;
+ font-size: 1.6em;
+}
+.left {width: 72%;}
+</style>
+{%endblock%}
+{%block body%}<body>{%endblock%}
+
+{% block content %}<div>
+<form action="/leave_message/" method="POST">
+<div class="row"><label>{%trans "From"%}<b>:</b></label><p class="ro">{{user.name}}</p></div>
+<div class="row"><label>{%trans "To"%}<b>:</b></label><p class="ro">{{rcpt}}</p></div>
+<div class="row"><br><label for="id_subj">{%trans "Subject"%}<b>:</b>{%if form.subj.errors%}<span class="error"><br />{{form.subj.errors}}</span>{%endif%}</label>{{form.subj}}</div>
+<div class="row"><br /><br /><label for="id_body">{%trans "Message"%} {%if form.body.errors%}(<span class="error">{%trans "required"%}</span>){%endif%}<b>:</b></label>{{form.body}}</div>
+<div class="row" style="margin-left:2px;"><br><br><label>&nbsp;</label><span class="button"><span class="first-child">
+<button type="submit">{%trans "Send"%}</button></span></span></div>
+<input type="hidden" name="rcpt" value="{{rcpt.id}}">
+</form>
+{% endblock %}
+{%block right%}{%if user.attrs|key:"inbox"%}
+<div id="rnote" class="rnote"><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+  {%ifequal page_id "received"%}
+  <p class="meta"><a href="/messages/sent/">{%trans "Sent messages"%}</a></p>
+  {%else%}
+  <p class="meta"><a href="/messages/received/">{%trans "Received messages"%}</a> ({{user.attrs|key:"inbox"}})</p>
+  {%endifequal%}
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div></div>{%endif%}
+{% endblock %}
+{%block footer%}{%endblock%}

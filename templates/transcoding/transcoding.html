@@ -1,0 +1,148 @@
+{%extends "users/auth.html"%}
+{%load i18n%}
+{%block title%}{%trans "Transcoding queue"%}{%endblock%}
+{%block meta%}
+<style type="text/css">
+.icon-avi { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -433px no-repeat; }
+.icon-vid { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 0px no-repeat; }
+#yn, #noc {display:inline;}
+#qmarkup {margin:2em 0 0 1em;}
+</style>
+<link rel="stylesheet" type="text/css" href="/media/yui/datatable/assets/skins/sam/datatable.css" />
+<link rel="stylesheet" type="text/css" href="/media/yui/datatable/assets/skins/sam/datatable.css" />
+<link rel="stylesheet" type="text/css" href="/media/yui/button/assets/skins/sam/button.css" />
+<script type="text/javascript" src="/media/yui/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="/media/yui/element/element-beta.js"></script>
+<script type="text/javascript" src="/media/yui/datasource/datasource-beta.js"></script>
+<script type="text/javascript" src="/media/yui/datatable/datatable-beta.js"></script>
+<script type="text/javascript" src="/media/yui/button/button.js"></script>
+{%endblock%}
+{%block body%}<body id="tqm" class="yui-skin-sam">{%endblock%}
+{%block content%}{%load ls%}{%load logic%}
+
+{%if post%}
+{%if form.ls%}<form id="tq" name="tq" action="/tq/{{post.id}}/" method="POST">
+<p>Select video file for preview generation:</p>
+<div id="markup"><table id="tbl">
+{%for r in form|unfold|truncate:"50"%}<tr>
+  <td><span>{{r.1}}</span>{{r.0.name|basename}}</td>
+  <td>{{r.0.size|measure}}</td>
+</tr>{%endfor%}
+</table></div>{%if form.ls|length|gt:"50"%}{%trans "The list is truncated"%}{%endif%}
+{{form.key}}
+<br><br><input id="submit" type="submit" value='{%trans "Submit"%}'>
+<script type="text/javascript">
+YAHOO.util.Event.addListener(window, "load", function() {
+var inp = document.getElementById('inp');
+var torm = document.getElementById('tbl').getElementsByTagName('span');
+while(torm.length!=0){
+inp.appendChild(torm[0]);
+}
+var columns = [
+{key:"fn", formatter:YAHOO.widget.DataTable.formatText, sortable:true},
+{key:"size", formatter:YAHOO.widget.DataTable.formatText, sortable:true},
+];
+var ds = new YAHOO.util.DataSource(YAHOO.util.Dom.get("tbl"));
+ds.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
+ds.responseSchema = {
+ fields: [{key:"fn", sortable:true},
+  {key:"size", sortable:true}
+]};
+var dt = new YAHOO.widget.DataTable("markup", columns, ds, 
+ {sortedBy:{key:"fn", dir:"desc"},
+ selectionMode:"single"});
+dt.subscribe("rowMouseoverEvent", dt.onEventHighlightRow);
+dt.subscribe("rowMouseoutEvent", dt.onEventUnhighlightRow);
+dt.subscribe("rowClickEvent", dt.onEventSelectRow);
+dt.selectRow(dt.getTrEl(0));
+dt.focus();
+var sb = new YAHOO.widget.Button("submit");
+function onSubmit(p_oEvent) {
+e = document.getElementById('id_file_'+dt.getSelectedRows()[0]);
+e.setAttribute('checked', 'checked');
+//YAHOO.util.Event.preventDefault(p_oEvent);
+}
+YAHOO.util.Event.on("tq", "submit", onSubmit);
+})
+</script>
+{%endif%}
+<div id="inp" class="hidden"></div>
+</form><br><hr>
+{%endif%}
+
+{%if qform%}<br><h1>{%trans "Transcoding queue"%}</h1><form method="POST" action="/tq/" id="tqm" name="tqm">
+<div id="qmarkup"><table id="qtbl">
+{%for r in qform.ql%}<tr>
+<td>{{r.1.topic.title}}</td>
+<td>{{r.1.file|basename}}</td>
+<td>{%trans r.1.status%}</td>
+<td>{%if r.1.order%}{{r.1.order}}{%endif%}<span><input type="text" id="id_q_{{forloop.counter0}}" name="q_{{forloop.counter0}}" value="{%if r.1.order%}{{r.1.order}}{%endif%}"></span></td>
+</tr>{%endfor%}</table></div>{{qform.key}}
+<br>
+<br><input id="qsubmit" type="submit" value='{%trans "Submit"%}'>
+<div id="qinp" class="hidden"></div>
+</form>
+<script type="text/javascript">
+YAHOO.util.Event.addListener(window, "load", function() {
+var qinp = document.getElementById('qinp');
+var qtorm = document.getElementById('qtbl').getElementsByTagName('span');
+while(qtorm.length!=0){
+qinp.appendChild(qtorm[0]);
+}
+
+var qcolumns = [
+{key:"post", label:'{%trans "related post"%}', formatter:YAHOO.widget.DataTable.formatText, sortable:true},
+{key:"fn", label:'{%trans "file"%}', formatter:YAHOO.widget.DataTable.formatText, sortable:true},
+{key:"status", label: '{%trans "status"%}', formatter:YAHOO.widget.DataTable.formatText, sortable:true},
+{key:"order", label:'{%trans "order"%}', editor:"textbox", sortable:true}
+];
+var qds = new YAHOO.util.DataSource(YAHOO.util.Dom.get("qtbl"));
+qds.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
+qds.responseSchema = {
+ fields: [{key:"post", sortable:true},
+  {key:"fn", sortable:true},
+  {key:"status", sortable:true},
+  {key:"order", sortable:true}
+]};
+var qdt = new YAHOO.widget.DataTable("qmarkup", qcolumns, qds, 
+ {sortedBy:{key:"order", dir:"desc"},
+ selectionMode:"single"});
+qdt.subscribe("rowMouseoverEvent", qdt.onEventHighlightRow);
+qdt.subscribe("rowMouseoutEvent", qdt.onEventUnhighlightRow);
+qdt.subscribe("rowClickEvent", qdt.onEventSelectRow);
+qdt.subscribe("cellDblclickEvent",qdt.onEventShowCellEditor);
+var onCellEdit = function(oArgs) {
+var elCell = oArgs.target;
+var oOldData = oArgs.oldData;
+var oNewData = oArgs.newData;
+var elRow = this.getTrEl(elCell);
+var origColor = YAHOO.util.Dom.getStyle(elRow, "backgroundColor");
+var pulseColor = "#ff0";
+var rowColorAnim = new YAHOO.util.ColorAnim(elRow, {
+backgroundColor:{to:origColor, from:pulseColor}, duration:2});
+var onComplete = function() {rowColorAnim = null;}
+rowColorAnim.onComplete.subscribe(onComplete);
+}
+qdt.subscribe("cellEditEvent", onCellEdit);
+qdt.subscribe("editorBlurEvent", qdt.onEventSaveCellEditor);
+//qdt.selectRow(qdt.getTrEl(0));
+//qdt.focus();
+var qsb = new YAHOO.widget.Button("qsubmit");
+function onTQSubmit(p_oEvent) {
+for(var i=0;i<{{qform.ql|length}};i++){
+e = document.getElementById('id_q_'+i);
+v = document.getElementById('yui-dt0-bdrow'+i+'-cell3');
+//e.setAttribute('value', v.firstChild.data);
+if(v.firstChild) e.value = v.firstChild.data;
+}
+//YAHOO.util.Event.preventDefault(p_oEvent);
+}
+YAHOO.util.Event.on("tqm", "submit", onTQSubmit);
+})
+</script>
+{%else%}
+<p>{%trans "Your transcoding queue is empty at this time."%}</p>
+{%endif%}
+
+{%endblock%}
+{%block right%}{%endblock%}

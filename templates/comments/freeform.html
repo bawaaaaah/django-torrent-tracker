@@ -1,0 +1,13 @@
+{% load i18n %}
+{% if display_form %}
+<form action="/comments/postfree/" method="post">
+<p>{%load recaptcha%}{% recaptcha %}{%if msg%}<br><p class="error">{{msg}}</p>{%endif%}</p><br><br>
+<div class="el"><label for="id_person_name">{% trans "Your name:" %}</label></div>
+<br><br><input type="text" id="id_person_name" name="person_name" /><br><br><br>
+<div class="el"><label for="id_comment">{% trans "Comment:" %}</label><br><br><textarea name="comment" id="id_comment" rows="5" cols="60"></textarea><br><br></div>
+<input type="hidden" name="options" value="{{ options }}" />
+<input type="hidden" name="target" value="{{ target }}" />
+<input type="hidden" name="gonzo" value="{{ hash }}" />
+<div class="el"><br><input type="submit" id="preview_submit" name="post" value="{% trans "Comment" %}" /></div>
+</form>
+{% endif %}

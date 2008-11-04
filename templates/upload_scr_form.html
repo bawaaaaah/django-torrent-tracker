@@ -1,0 +1,21 @@
+{# this is iframe contents #}
+{%load i18n%}{%load logic%}
+<html><body>
+<form action="/upload_scr/{{form.topic.id}}/" method="post" name="upload_scr" enctype='multipart/form-data'>
+<div class="row"><label>{%trans "screenshot"%}: </label>{{form.scr}}</div>
+{%if form.scr.errors%}<span class="error">{{form.scr.errors}}</span>{%endif%}
+<br/><input type="submit" name="submit" id="scr_upl_btn" value="{%trans "Upload"%}"/>
+</form>
+<script type="text/javascript">
+var root = window.parent.document.getElementById('scrs');
+var scrs = [{%for s in form.topic.attrs|key:"scrs"%}'{{s}}'{%if not forloop.last%}, {%endif%}{%endfor%}]
+while ( root.childNodes.length >= 1 ){
+root.removeChild( root.firstChild );
+}
+for(var i=0;i<scrs.length;i++){
+img = document.createElement('img');
+img.setAttribute('src', '/media/iscr/'+scrs[i]);
+root.appendChild(img);
+}
+</script>
+</body></html>

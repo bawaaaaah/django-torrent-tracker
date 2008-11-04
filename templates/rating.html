@@ -1,0 +1,16 @@
+{%load i18n%}
+<div id="ratingdiv">
+<form class="rating" action="/rate/" method="POST">
+<label for="id_rating">Rating:</label>
+<select name="rating" id="id_rating">
+<option value="1">1 - Poor</option>
+<option value="2">2 - Nothing special</option>
+<option value="3">3 - Good</option>
+<option value="4">4 - Pretty cool</option>
+<option value="5">5 - Awesome!</option>
+</select>
+<input type="hidden" name="post" value="{{post.id}}">
+<input type="submit" value=" Submit rating" />
+</form>
+</div>
+</div>

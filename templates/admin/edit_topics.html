@@ -1,0 +1,28 @@
+{%load logic%}
+<html><body>
+{{form.errors}}
+<form action="/admin/edit/topics/{{the_id}}/" method="POST" enctype="multipart/form-data">
+<p>Title<b>:</b> {{form.title}}</p>
+<p>Tags<b>:</b> <input value="{%for tag in form.instance.tags%}{{tag.name}}{%if not forloop.last%}, {%endif%}{%endfor%}" type="text" name="tags"/></p>
+<p>text<b>:</b><br>{{form.text}}</p>
+<p>poster<b>:</b><br>
+<img src="/media/iposter/{{form.instance.poster}}"><br>
+{{form.poster}}</p>
+{%if form.instance.attrs|key:"scrs"%}
+<p><table>{%for s in form.instance.attrs|key:"scrs"%}
+<tr><td>{{s}}</td><td><img src="/media/iscr/{{s}}"></td></tr>
+{%endfor%}</table>
+</p><p>delete screenshots<b>:</b> {{form.screenshots}}</p>
+{%endif%}
+<p>section<b>:</b> {{form.section}}</p>
+<p>torrent<b>:</b> {{form.torrent}}</p>
+<p>imdb<b>:</b> {{form.imdb}}</p>
+<p>artist<b>:</b>{{form.artist}}</p>
+<p>album<b>:</b>{{form.album}}</p>
+<p>year<b>:</b>{{form.year}}</p>
+<p>company<b>:</b>{{form.company}}</p>
+<p>lngs<b>:</b>{{form.lngs}}</p>
+<input type="submit" value="submit">
+</form>
+{%if form.instance.attrs|key:"files"%}<p>{{form.instance.attrs|key:"files"}}</p>{%endif%}
+</body></html>

@@ -1,0 +1,261 @@
+{%load i18n%}{%load logic%}{%load comments%}{%load ls%}
+{% autoescape off %}
+
+{%if movies%}
+<h1><a title="{%trans "Movies"%}" href="/sections/movies/">{%trans "Movies"%}</a></h1>
+<span class="rss"><a href="/feeds/rss/section/movies/"><img src="/media/blue-feed.png" title="{%trans "Movies"%} RSS"/></a></span>
+<a title="{%trans "Clips"%}" href="/sections/clip/">{%trans "clips"%}</a>
+<table cellspacing="0" width="98%">
+<tr><th scope="col" width="12%">added</th>
+<th scope="col" width="66%">name</th>
+<th scope="col" width="8%">size</th>
+<th scope="col" width="6%">seeds</th>
+<th scope="col" width="8%">leechers</th></tr>
+{%for post in movies%}<tr {%if forloop.counter0|odd %} 'class="d"'{%endif%}>
+<td align="center">
+{{post.created|date:"d.m.y H:i"}}
+</td>
+
+<td class="tlist">
+<span class="body">{%if is_open_tracker%}<h4 class="meta"><a title="{{post.title}}: download torrent" href="/torrent/{{post.id}}/">{%trans "download"%}</a>
+</h4>{%endif%}
+<a title="{{post.title}} torrent" href="/~{{post.author.username}}/{{post.slug}}/">{%if post.title|strlen|gt:"29"%}{{post.title|truncate:"30"}}..{%else%}{{post.title}}{%endif%}</a>
+</span>
+<span class="footer">
+{%if post.tags%}<h4 class="meta">
+{%for tag in post.tags|truncate:"3"%}<a title="{%trans "tag"%} {{tag.name}}: {{post.title}}" href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if post.tags|length|gt:"3"%} ..{%endif%}
+</h4>{%endif%}
+<h4 class="cmnts">
+{% get_comment_count for post as comment_count %}
+{%if comment_count%}
+<a title='"{{post.title}}" comments' href="/~{{post.author.username}}/{{post.slug}}/">
+{%trans "comments"%}: {{comment_count}}</a>
+{%endif%}
+</h4>
+</span>
+</td>
+<td align="right">{{post.torrent.bytes|measure}}</td>
+{% with post.torrent.id|get_peers as props %}
+<td align="right">{{props.0}}</td><td align="right">{{props.1}}</td>
+{% endwith %}
+
+</tr>{%endfor%}
+</table>
+{%endif%}
+
+{%if anime%}
+<br><br>
+<h1><a href="/sections/anime/">{%trans "Anime"%}</a></h1>
+<span class="rss"><a href="/feeds/rss/section/anime/"><img src="/media/blue-feed.png" title="{%trans "Anime"%} RSS"/></a></span>
+<table cellspacing="0" width="98%">
+<tr><th scope="col" width="12%">added</th>
+<th scope="col" width="66%">name</th>
+<th scope="col" width="8%">size</th>
+<th scope="col" width="6%">seeds</th>
+<th scope="col" width="8%">leechers</th></tr>
+{%for post in anime%}<tr {%if forloop.counter0|odd %} 'class="d"'{%endif%}>
+<td align="center">
+{{post.created|date:"d.m.y H:i"}}
+</td>
+
+<td class="tlist">
+<span class="body">{%if is_open_tracker%}<h4 class="meta"><a title="{{post.title}}: download torrent" href="/torrent/{{post.id}}/">{%trans "download"%}</a>
+</h4>{%endif%}
+<a title="{{post.title}} torrent" href="/~{{post.author.username}}/{{post.slug}}/">{%if post.title|strlen|gt:"29"%}{{post.title|truncate:"30"}}..{%else%}{{post.title}}{%endif%}</a>
+</span>
+<span class="footer">
+{%if post.tags%}<h4 class="meta">
+{%for tag in post.tags|truncate:"3"%}<a title="{%trans "tag"%} {{tag.name}}: {{post.title}}" href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if post.tags|length|gt:"3"%} ..{%endif%}
+</h4>{%endif%}
+<h4 class="cmnts">
+{% get_comment_count for post as comment_count %}
+{%if comment_count%}
+<a title='"{{post.title}}" comments' href="/~{{post.author.username}}/{{post.slug}}/">
+{%trans "comments"%}: {{comment_count}}</a>
+{%endif%}
+</h4>
+</span>
+</td>
+<td align="right">{{post.torrent.bytes|measure}}</td>
+{% with post.torrent.id|get_peers as props %}
+<td align="right">{{props.0}}</td><td align="right">{{props.1}}</td>
+{% endwith %}
+
+</tr>{%endfor%}
+</table>
+{%endif%}
+
+{%if music%}
+<br><br>
+<h1><a href="/sections/music/">{%trans "Music"%}</a></h1>
+<span class="rss"><a href="/feeds/rss/section/music/"><img src="/media/blue-feed.png" title="{%trans "Music"%} RSS"/></a></span>
+<table cellspacing="0" width="98%">
+<tr><th scope="col" width="12%">added</th>
+<th scope="col" width="66%">name</th>
+<th scope="col" width="8%">size</th>
+<th scope="col" width="6%">seeds</th>
+<th scope="col" width="8%">leechers</th></tr>
+{%for post in music%}<tr {%if forloop.counter0|odd %} 'class="d"'{%endif%}>
+<td align="center">
+{{post.created|date:"d.m.y H:i"}}
+</td>
+
+<td class="tlist">
+<span class="body">{%if is_open_tracker%}<h4 class="meta"><a title="{{post.title}}: download torrent" href="/torrent/{{post.id}}/">{%trans "download"%}</a>
+</h4>{%endif%}
+<a title="{{post.title}} torrent" href="/~{{post.author.username}}/{{post.slug}}/">{%if post.title|strlen|gt:"29"%}{{post.title|truncate:"30"}}..{%else%}{{post.title}}{%endif%}</a>
+</span>
+<span class="footer">
+{%if post.tags%}<h4 class="meta">
+{%for tag in post.tags|truncate:"3"%}<a title="{%trans "tag"%} {{tag.name}}: {{post.title}}" href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if post.tags|length|gt:"3"%} ..{%endif%}
+</h4>{%endif%}
+<h4 class="cmnts">
+{% get_comment_count for post as comment_count %}
+{%if comment_count%}
+<a title='"{{post.title}}" comments' href="/~{{post.author.username}}/{{post.slug}}/">
+{%trans "comments"%}: {{comment_count}}</a>
+{%endif%}
+</h4>
+</span>
+</td>
+<td align="right">{{post.torrent.bytes|measure}}</td>
+{% with post.torrent.id|get_peers as props %}
+<td align="right">{{props.0}}</td><td align="right">{{props.1}}</td>
+{% endwith %}
+
+</tr>{%endfor%}
+</table>
+{%endif%}
+
+{%if tv%}
+<br><br>
+<h1><a href="/sections/tv/">{%trans "TV"%}</a></h1>
+<span class="rss"><a href="/feeds/rss/section/tv/"><img src="/media/blue-feed.png" title="{%trans "TV"%} RSS"/></a></span>
+
+<table cellspacing="0" width="98%">
+<tr><th scope="col" width="12%">added</th>
+<th scope="col" width="66%">name</th>
+<th scope="col" width="8%">size</th>
+<th scope="col" width="6%">seeds</th>
+<th scope="col" width="8%">leechers</th></tr>
+{%for post in tv%}<tr {%if forloop.counter0|odd %} 'class="d"'{%endif%}>
+<td align="center">
+{{post.created|date:"d.m.y H:i"}}
+</td>
+
+<td class="tlist">
+<span class="body">{%if is_open_tracker%}<h4 class="meta"><a title="{{post.title}}: download torrent" href="/torrent/{{post.id}}/">{%trans "download"%}</a>
+</h4>{%endif%}
+<a title="{{post.title}} torrent" href="/~{{post.author.username}}/{{post.slug}}/">{%if post.title|strlen|gt:"29"%}{{post.title|truncate:"30"}}..{%else%}{{post.title}}{%endif%}</a>
+</span>
+<span class="footer">
+{%if post.tags%}<h4 class="meta">
+{%for tag in post.tags|truncate:"3"%}<a title="{%trans "tag"%} {{tag.name}}: {{post.title}}" href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if post.tags|length|gt:"3"%} ..{%endif%}
+</h4>{%endif%}
+<h4 class="cmnts">
+{% get_comment_count for post as comment_count %}
+{%if comment_count%}
+<a title='"{{post.title}}" comments' href="/~{{post.author.username}}/{{post.slug}}/">
+{%trans "comments"%}: {{comment_count}}</a>
+{%endif%}
+</h4>
+</span>
+</td>
+<td align="right">{{post.torrent.bytes|measure}}</td>
+{% with post.torrent.id|get_peers as props %}
+<td align="right">{{props.0}}</td><td align="right">{{props.1}}</td>
+{% endwith %}
+
+</tr>{%endfor%}
+</table>
+{%endif%}
+
+{%if pics%}
+<br><br>
+<h1><a title="{%trans "Pictures"%}" href="/sections/pics/">{%trans "Pictures"%}</a></h1>&nbsp;<a title="{%trans "Photo"%}" href="/sections/photo/">{%trans "photo"%}</a>&nbsp;<a title="{%trans "Comics"%}" href="/sections/comics/">{%trans "comics"%}</a>
+<span class="rss"><a href="/feeds/rss/section/pics/"><img src="/media/blue-feed.png" title="{%trans "Pictures"%} RSS"/></a></span>
+
+<table cellspacing="0" width="98%">
+<tr><th scope="col" width="12%">added</th>
+<th scope="col" width="66%">name</th>
+<th scope="col" width="8%">size</th>
+<th scope="col" width="6%">seeds</th>
+<th scope="col" width="8%">leechers</th></tr>
+{%for post in pics%}<tr {%if forloop.counter0|odd %} 'class="d"'{%endif%}>
+<td align="center">
+{{post.created|date:"d.m.y H:i"}}
+</td>
+
+<td class="tlist">
+<span class="body">{%if is_open_tracker%}<h4 class="meta"><a title="{{post.title}}: download torrent" href="/torrent/{{post.id}}/">{%trans "download"%}</a>
+</h4>{%endif%}
+<a title="{{post.title}} torrent" href="/~{{post.author.username}}/{{post.slug}}/">{%if post.title|strlen|gt:"29"%}{{post.title|truncate:"30"}}..{%else%}{{post.title}}{%endif%}</a>
+</span>
+<span class="footer">
+{%if post.tags%}<h4 class="meta">
+{%for tag in post.tags|truncate:"3"%}<a title="{%trans "tag"%} {{tag.name}}: {{post.title}}" href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if post.tags|length|gt:"3"%} ..{%endif%}
+</h4>{%endif%}
+<h4 class="cmnts">
+{% get_comment_count for post as comment_count %}
+{%if comment_count%}
+<a title='"{{post.title}}" comments' href="/~{{post.author.username}}/{{post.slug}}/">
+{%trans "comments"%}: {{comment_count}}</a>
+{%endif%}
+</h4>
+</span>
+</td>
+<td align="right">{{post.torrent.bytes|measure}}</td>
+{% with post.torrent.id|get_peers as props %}
+<td align="right">{{props.0}}</td><td align="right">{{props.1}}</td>
+{% endwith %}
+
+</tr>{%endfor%}
+</table>
+{%endif%}
+
+
+{%if games%}
+<br><br>
+<h1><a title="{%trans "Game"%} torrents" href="/sections/games/">{%trans "Games"%}</a></h1>
+<span class="rss"><a href="/feeds/rss/section/games/"><img src="/media/blue-feed.png" title="{%trans "Games"%} RSS"/></a></span>
+
+<table cellspacing="0" width="98%">
+<tr><th scope="col" width="12%">added</th>
+<th scope="col" width="66%">name</th>
+<th scope="col" width="8%">size</th>
+<th scope="col" width="6%">seeds</th>
+<th scope="col" width="8%">leechers</th></tr>
+{%for post in games%}<tr {%if forloop.counter0|odd %} 'class="d"'{%endif%}>
+<td align="center">
+{{post.created|date:"d.m.y H:i"}}
+</td>
+
+<td class="tlist">
+<span class="body">{%if is_open_tracker%}<h4 class="meta"><a title="{{post.title}}: download torrent" href="/torrent/{{post.id}}/">{%trans "download"%}</a>
+</h4>{%endif%}
+<a title="{{post.title}} torrent" href="/~{{post.author.username}}/{{post.slug}}/">{%if post.title|strlen|gt:"29"%}{{post.title|truncate:"30"}}..{%else%}{{post.title}}{%endif%}</a>
+</span>
+<span class="footer">
+{%if post.tags%}<h4 class="meta">
+{%for tag in post.tags|truncate:"3"%}<a title="{%trans "tag"%} {{tag.name}}: {{post.title}}" href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if post.tags|length|gt:"3"%} ..{%endif%}
+</h4>{%endif%}
+<h4 class="cmnts">
+{% get_comment_count for post as comment_count %}
+{%if comment_count%}
+<a title='"{{post.title}}" comments' href="/~{{post.author.username}}/{{post.slug}}/">
+{%trans "comments"%}: {{comment_count}}</a>
+{%endif%}
+</h4>
+</span>
+</td>
+<td align="right">{{post.torrent.bytes|measure}}</td>
+{% with post.torrent.id|get_peers as props %}
+<td align="right">{{props.0}}</td><td align="right">{{props.1}}</td>
+{% endwith %}
+
+</tr>{%endfor%}
+</table>
+{%endif%}
+
+
+{% endautoescape %}

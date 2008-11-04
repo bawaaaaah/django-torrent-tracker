@@ -1,0 +1,90 @@
+{% extends "index.html" %}{% load i18n %}
+{% block title %}{%trans "New thread"%}{% endblock %}
+{%block search%}{%endblock%}
+{% block meta %}
+<link rel="stylesheet" type="text/css" href="/media/yui/button/assets/skins/sam/button.css" />
+<script type="text/javascript" src="/media/yui/utilities/utilities.js"></script>
+<script type="text/javascript" src="/media/yui/button/button-min.js"></script>
+<style type="text/css" media="screen">
+#id_text{width: 23em;}
+#e, #c, #w{
+ padding: 2px;
+ background: rgb(204, 68, 68) none repeat scroll 0%;
+ color: white;
+ font-size: 1em;
+ display: none;
+}
+.yui-button {
+ font-size: 1.2em;
+}
+</style>
+{% endblock %}
+{%block bbs%}<li id="forum"><span>{%trans "BBS"%}</span></li>{%endblock%}
+{% block body %}<body class="yui-skin-sam">{% endblock %}
+{% block content %}
+<div id="markup"><div id="target"></div>
+<div id="e">{%trans "Something's Gone Wrong"%}</div><div id="c">{%trans "Connection problem"%}</div><div id="w">{%trans "'text' field is required"%}</div>
+<form action="/bbs/newtopic/" method="POST">
+<div class="row"><label for="id_forums">{%trans "forum"%}<b>:</b>{%if form.forums.errors%}<br /><span class="error">{{form.forums.errors}}</span>{%endif%}</label>{{form.forums}}<br><br></div>
+<div class="row"><label for="id_subject">{%trans "subject"%}<b>:</b>{%if form.subject.errors%}<br /><span class="error">{{form.subject.errors}}</span>{%endif%}</label>{{form.subject}}<br><br></div>
+<div class="row"><label for="id_image">{%trans "image"%}<b>:</b>{%if form.image.errors%}<br /><span class="error">{{form.image.errors}}</span>{%endif%}</label>{{form.image}}<br></div>
+<div class="row"><br><label>{%trans "text"%}<b>:</b>{%if form.text.errors%}<br /><span class="error">{{form.text.errors}}</span>{%endif%}</label>{{form.text}}</div>
+<div class="row"><div id="preview"></div>
+<span class="button" style="vertical-align: top;margin-top:0.2em;"><span class="first-child">
+<button type="submit">Готово</button></span></span>
+</div>
+</form></div>
+
+<script type="text/javascript">
+function msg(action, id){
+var e = document.getElementById(id)
+if(e){
+if(action=='show'){
+e.style.display='inline';
+}else{e.style.display='none';}
+}
+}
+
+YAHOO.util.Event.onContentReady("markup", function () {
+function onPreview(e){
+var callback = {
+ success : function(o) {
+  n = document.getElementById('target');
+  m = "<div class='article'><p class='meta'><a href='/~{{user.username}}/'>{{user.name}}</a>, {%trans "few minutes ago"%}</p><div class='body'>"
+  img = document.getElementById('id_image');
+  if(img){if(img.value.length>0)m+="<p class='imageleft'><img src='/media/noi.png'></p>";}
+  m+="<p>"+o.responseText+"</p></div></div>"
+  n.innerHTML = m;
+  msg('hide', 'e');
+ },
+ failure : function(o) {
+  msg('show', 'e');
+ }
+}
+var text = document.getElementById('id_text');
+if(!text)return;
+if(text.value.length == 0){msg("show","w");return;}else{msg("hide", "w");}
+var data = "text="+encodeURI(text.value);
+var conn = YAHOO.util.Connect.asyncRequest("POST", "/bbs/rpc/preview/", callback, data);
+}
+var pv = new YAHOO.widget.Button("preview", { label: '{%trans "Preview"%}', onclick: {fn: onPreview}});
+});
+</script>
+{% endblock %}
+{% block right %}
+<div class="rnote"><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+  <p class="meta"><a href="/self/">{%trans "Edit profile"%}</a></p>
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div></div>
+{%endblock%}

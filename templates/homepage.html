@@ -1,0 +1,234 @@
+{% extends "index.html" %}
+{%load i18n%}{%load logic%}{%load ls%}{%load comments%}{%load markup%}
+{%block meta%}
+{%if user.is_authenticated and not user.id|equal:object.id%}
+<link rel="stylesheet" type="text/css" href="/media/yui/button/assets/skins/sam/button.css" />
+<script type="text/javascript" src="/media/yui/yahoo/yahoo-min.js"></script>
+<script type="text/javascript" src="/media/yui/event/event-min.js"></script>
+<script type="text/javascript" src="/media/yui/connection/connection-min.js"></script>
+<script type="text/javascript" src="/media/yui/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="/media/yui/element/element-beta.js"></script>
+<script type="text/javascript" src="/media/yui/button/button-min.js"></script>
+{%endif%}
+{%if post%}{%include "highslide.htm"%}{%endif%}
+{%endblock%}
+
+{% block title %}{{object.name}}@{{site_domain}}{% endblock %}
+
+{%block body%}{% if user.is_authenticated and user.id|equal:object.id %}<body id="account">{%else%}<body class="yui-skin-sam">{%endif%}{% endblock %}
+
+{% block content %}
+
+{%if object.text%}<p><b>{%trans "Profile"%}:</b> {% autoescape off %}{{object.text|bbcode}}{% endautoescape %}</p>{%else%}{%if user.is_authenticated and user.id|equal:object.id%}
+<div id="profile"><form method="POST" action="/self/personal/">
+<fieldset><label for="id_text"><b>{%trans "Profile"%}:</b><br></label>
+<textarea style="width:98%;margin-bottom:1em;" id="id_text" type="text" name="text"></textarea>
+<div class="row" style="margin-left:2px;"><span class="button"><span class="first-child">
+<button type="submit">{%trans "Write"%}</button></span></span></div><br>
+<input type="hidden" name="redirect" value="/~{{object.username}}/">
+</fieldset></form></div>
+{%endif%}{%endif%}
+
+{%if last10%}<br><br>
+<h1>{%trans "Last 10 torrents of "%} {{object.username}}</h1>
+<table cellspacing="0" width="98%">
+<tr><th scope="col" width="12%">category</th>
+<th scope="col" width="66%">name</th>
+<th scope="col" width="8%">size</th>
+<th scope="col" width="6%">seeds</th>
+<th scope="col" width="8%">leechers</th></tr>
+{%for post in last10%}<tr {%if forloop.counter0|odd %} 'class="d"'{%endif%}>
+<td align="center">
+<a title="{{post.section|transcat}} torrents" href="/sections/{{post.section}}/">{{post.section|transcat}}</a>
+{%if post.subcat|transcat and not post.subcat|equal:post.section%}<br/>(<a title="{{post.subcat|transcat}} torrents" href="/sections/{{post.subcat}}/">{{post.subcat|transcat}}</a>)</h4>{%endif%}
+</td>
+
+<td class="tlist">
+<span class="body">{%if is_open_tracker%}<h4 class="meta"><a title="{{post.title}}: download torrent" href="/torrent/{{post.id}}/">{%trans "download"%}</a>
+</h4>{%endif%}
+<a title="{{post.title}} torrent" href="/~{{post.author.username}}/{{post.slug}}/">{%if post.title|strlen|gt:"29"%}{{post.title|truncate:"30"}}..{%else%}{{post.title}}{%endif%}</a>
+</span>
+<span class="footer">
+{%if post.tags%}<h4 class="meta">
+{%for tag in post.tags|truncate:"3"%}<a title="{%trans "tag"%} {{tag.name}}: {{post.title}}" href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if post.tags|length|gt:"3"%} ..{%endif%}
+</h4>{%endif%}
+<h4 class="cmnts">
+{% get_comment_count for post as comment_count %}
+{%if comment_count%}
+<a title='"{{post.title}}" comments' href="/~{{post.author.username}}/{{post.slug}}/">
+{%trans "comments"%}: {{comment_count}}</a>
+{%endif%}
+</h4>
+</span>
+</td>
+<td align="right">{{post.torrent.bytes|measure}}</td>
+{% with post.torrent.id|get_peers as props %}
+<td align="right">{{props.0}}</td><td align="right">{{props.1}}</td>
+{% endwith %}
+
+</tr>{%endfor%}
+</table>
+<p style="text-align:right;"><a href="/~{{object.username}}/posts/" title="{%trans "All posts of"%} {{object.username}}">{%trans "All"%}</a> {%trans "posts of"%} {{object.username}}</p>
+
+{%endif%}
+
+{%if subs%}<br><br>
+<h1>{%trans "Subscription "%}</h1>
+<table cellspacing="0" width="98%">
+<tr><th scope="col" width="12%">category</th>
+<th scope="col" width="66%">name</th>
+<th scope="col" width="8%">size</th>
+<th scope="col" width="6%">seeds</th>
+<th scope="col" width="8%">leechers</th></tr>
+{%for post in subs%}<tr {%if forloop.counter0|odd %} 'class="d"'{%endif%}>
+<td align="center">
+<a title="{{post.section|transcat}} torrents" href="/sections/{{post.section}}/">{{post.section|transcat}}</a>
+{%if post.subcat|transcat and not post.subcat|equal:post.section%}<br/>(<a title="{{post.subcat|transcat}} torrents" href="/sections/{{post.subcat}}/">{{post.subcat|transcat}}</a>)</h4>{%endif%}
+</td>
+
+<td class="tlist">
+<span class="body">{%if is_open_tracker%}<h4 class="meta"><a title="{{post.title}}: download torrent" href="/torrent/{{post.id}}/">{%trans "download"%}</a>
+</h4>{%endif%}
+<a title="{{post.title}} torrent" href="/~{{post.author.username}}/{{post.slug}}/">{%if post.title|strlen|gt:"29"%}{{post.title|truncate:"30"}}..{%else%}{{post.title}}{%endif%}</a>
+</span>
+<span class="footer">
+{%if post.tags%}<h4 class="meta">
+{%for tag in post.tags|truncate:"3"%}<a title="{%trans "tag"%} {{tag.name}}: {{post.title}}" href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if post.tags|length|gt:"3"%} ..{%endif%}
+</h4>{%endif%}
+<h4 class="cmnts">
+{% get_comment_count for post as comment_count %}
+{%if comment_count%}
+<a title='"{{post.title}}" comments' href="/~{{post.author.username}}/{{post.slug}}/">
+{%trans "comments"%}: {{comment_count}}</a>
+{%endif%}
+</h4>
+</span>
+</td>
+<td align="right">{{post.torrent.bytes|measure}}</td>
+{% with post.torrent.id|get_peers as props %}
+<td align="right">{{props.0}}</td><td align="right">{{props.1}}</td>
+{% endwith %}
+
+</tr>{%endfor%}
+</table>
+{%endif%}
+
+{%if result.object_list%}
+<h1>{{title}}</h1>
+<table cellspacing="0" width="98%">
+<tr><th scope="col" width="12%">category</th>
+<th scope="col" width="66%">name</th>
+<th scope="col" width="8%">size</th>
+<th scope="col" width="6%">seeds</th>
+<th scope="col" width="8%">leechers</th></tr>
+{%for post in result.object_list reversed%}<tr {%if forloop.counter0|odd %} 'class="d"'{%endif%}>
+<td align="center">
+<a title="{{post.section|transcat}} torrents" href="/sections/{{post.section}}/">{{post.section|transcat}}</a>
+{%if post.subcat|transcat and not post.subcat|equal:post.section%}<br/>(<a title="{{post.subcat|transcat}} torrents" href="/sections/{{post.subcat}}/">{{post.subcat|transcat}}</a>)</h4>{%endif%}
+</td>
+
+<td class="tlist">
+<span class="body">{%if is_open_tracker%}<h4 class="meta"><a title="{{post.title}}: download torrent" href="/torrent/{{post.id}}/">{%trans "download"%}</a>
+</h4>{%endif%}
+<a title="{{post.title}} torrent" href="/~{{post.author.username}}/{{post.slug}}/">{%if post.title|strlen|gt:"29"%}{{post.title|truncate:"30"}}..{%else%}{{post.title}}{%endif%}</a>
+</span>
+<span class="footer">
+{%if post.tags%}<h4 class="meta">
+{%for tag in post.tags|truncate:"3"%}<a title="{%trans "tag"%} {{tag.name}}: {{post.title}}" href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if post.tags|length|gt:"3"%} ..{%endif%}
+</h4>{%endif%}
+<h4 class="cmnts">
+{% get_comment_count for post as comment_count %}
+{%if comment_count%}
+<a title='"{{post.title}}" comments' href="/~{{post.author.username}}/{{post.slug}}/">
+{%trans "comments"%}: {{comment_count}}</a>
+{%endif%}
+</h4>
+</span>
+</td>
+<td align="right">{{post.torrent.bytes|measure}}</td>
+{% with post.torrent.id|get_peers as props %}
+<td align="right">{{props.0}}</td><td align="right">{{props.1}}</td>
+{% endwith %}
+
+</tr>{%endfor%}
+</table>
+{% load paginator %}{% paginator %}
+
+{%else%}
+{%endif%}
+
+{%endblock%}
+{%block right%}
+<div id="rnote" class="rnote"><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+  {%if object.name%}<p class="meta">{%trans "Name"%}<b>:</b> {{ object.name }}{%endif%}</p>
+  {%if user.is_authenticated and user.id|equal:object.id %}
+  <p class="meta"><a href="{% url users.views.edit_profile %}">{%trans "Edit profile"%}</a></p>
+  {%endif%}
+  {%if object.image%}<p class="meta"><a class="highslide" href="/media/avatar/{{object.image}}" onclick="return hs.expand(this)"><img title="{{object}}" src="/media/iavatar/{{object.image}}" /></a></p>{%endif%}
+  {%if user.is_authenticated and object.im%}<p class="meta">IM<b>:</b> {{object.im}}</p>{%endif%}
+  <p class="meta">{%trans "Joined"%}<b>:</b> {{object.date_joined|timesince}} {%trans "ago"%}</p>
+  <p class="meta">{%trans "Last login"%}<b>:</b> {{object.last_login|timesince}} {%trans "ago"%}</p>
+  {%if object.age%}<p class="meta">{%trans "Age"%}<b>:</b> {{object.age}}</p>{%endif%}
+  {%if object.attrs|key:"posts"%}<p class="meta">{%trans "Posts"%}<b>:</b> {{object.attrs|key:"posts"}}</p>{%endif%}
+  {% if object.openid %}<p class="meta">OpenID<b>:</b> <a href="{{ object.openid }}">URL</a></p>{%endif%}
+  {%if object.attrs|key:"subscribers"%}<p>{%trans "subscribers"%}<b>:</b> {{object.attrs|key:"subscribers"|length}}</p>{%endif%}
+  {%if user.is_authenticated and user.id|equal:object.id %}
+  {%if user.attrs|key:"inbox"%}{%if user.attrs|key:"inbox"|gt:"0"%}<a href="/messages/received/">{%trans "inbox"%}</a><b>:</b> {{user.attrs|key:"inbox"}}{%endif%}{%endif%}
+  <!--<a href="/homepage/">{%trans "Customize this page"%}</a>--><br><br>
+  {%endif%}
+  {%if user.is_authenticated and not user.id|equal:object.id%}
+  <div id="subs_markup"></div>
+  <p><br/><a title="{%trans "leave message for"%} {{object.name}}" id="leave_msg" href="/leave_message/{{object.id}}/">{%trans "Leave message"%}</a></p>
+  {% endif %}
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div>
+</div>{%if user.is_authenticated and not user.id|equal:object.id%}
+<script type="text/javascript">
+YAHOO.util.Event.onContentReady("rnote", function () {
+{%if user.attrs|key:"beats"|inlist:object.id%}var state='unsubscribe'
+{%else%}var state='subscribe'
+{%endif%};
+
+function fail(){
+e = document.getElementById('subscription').parentNode;
+m = document.createElement('span');
+m.appendChild(document.createTextNode("{%trans "Something gone wrong. Try later."%}"));
+m.setAttribute("class", "error");
+e.appendChild(m);
+}
+
+function onSubs(e){
+sb.set('disabled', true);
+
+var callback = {
+success: function(o){
+result = o.responseXML.documentElement.getElementsByTagName('msg');
+if(result.length>0){
+if(result[0].firstChild.nodeValue=='success'){
+sb.set('label', state=='subscribe'?'{%trans "Unubscribe"%}':'{%trans "Subscribe"%}');
+state = state=="subscribe"?"unsubscribe":"subscribe";
+sb.set('disabled', false);
+}else{fail();return;}
+}else{fail();return;}
+},
+failure: function(o){fail();}
+}
+var conn = YAHOO.util.Connect.asyncRequest("GET", "/subscribe/?uid={{object.id}}&xhr=1", callback);
+YAHOO.util.Event.preventDefault(e);
+}
+
+var sb = new YAHOO.widget.Button({container:"subs_markup", id: "sbtn", label: state=='subscribe'?'{%trans "Subscribe"%}':'{%trans "Unsubscribe"%}', onclick: {fn: onSubs}});
+})
+</script>{%endif%}
+{% endblock %}

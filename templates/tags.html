@@ -1,0 +1,69 @@
+{%extends "index.html"%}
+{%load i18n%}{%load logic%}{%load ls%}{%load comments%}
+{%block title%}{{tag}}{%endblock%}
+{%block body%}<body>{%endblock%}
+
+{%block content%}
+<h1>{{title}}</h1>
+{%if result.object_list%}
+<table cellspacing="0" width="98%">
+<tr><th scope="col" width="12%">category</th>
+<th scope="col" width="66%">name</th>
+<th scope="col" width="8%">size</th>
+<th scope="col" width="6%">seeds</th>
+<th scope="col" width="8%">leechers</th></tr>
+{%for post in result.object_list reversed%}<tr {%if forloop.counter0|odd %} 'class="d"'{%endif%}>
+<td align="center">
+<a title="{{post.section|transcat}} torrents" href="/sections/{{post.section}}/">{{post.section|transcat}}</a>
+{%if post.subcat|transcat and not post.subcat|equal:post.section%}<br/>(<a title="{{post.subcat|transcat}} torrents" href="/sections/{{post.subcat}}/">{{post.subcat|transcat}}</a>)</h4>{%endif%}
+</td>
+
+<td class="tlist">
+<span class="body"><h4 class="meta"><a title="{{post.title}}: download torrent" href="/torrent/{{post.id}}/">{%trans "download"%}</a>
+</h4>
+<a title="{{post.title}} torrent" href="/~{{post.author.username}}/{{post.slug}}/">{%if post.title|strlen|gt:"29"%}{{post.title|truncate:"30"}}..{%else%}{{post.title}}{%endif%}</a>
+</span>
+<span class="footer">
+{%if post.tags%}<h4 class="meta">
+{%for tag in post.tags|truncate:"3"%}<a title="{%trans "tag"%} {{tag.name}}: {{post.title}}" href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if post.tags|length|gt:"3"%} ..{%endif%}
+</h4>{%endif%}
+<h4 class="cmnts">
+{% get_comment_count for post as comment_count %}
+{%if comment_count%}
+<a title='"{{post.title}}" comments' href="/~{{post.author.username}}/{{post.slug}}/">
+{%trans "comments"%}: {{comment_count}}</a>
+{%endif%}
+</h4>
+</span>
+</td>
+<td align="right">{{post.torrent.bytes|measure}}</td>
+{% with post.torrent.id|get_peers as props %}
+<td align="right">{{props.0}}</td><td align="right">{{props.1}}</td>
+{% endwith %}
+
+</tr>{%endfor%}
+</table>
+{%endif%}
+
+{% load paginator %}{% paginator %}
+{% endblock %}
+</div>
+</div>
+{%block right%}{%if related_tags%}
+<div class="rnote"><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+  <h1>{%trans "Related tags"%}</h1>
+  <p><br>{%for t in related_tags%}<a href="/tag/{{t.name}}">{{t.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}</p>
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div></div>{%endif%}
+{%endblock%}

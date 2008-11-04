@@ -1,0 +1,86 @@
+{%extends "index.html"%}
+{%load i18n%}{%load comments%}{% load logic %}{% load ls %}{%load tag_list%}
+{%block title%}'{{slug|transcat}}'{%endblock%}
+{%block body%}<body>{%endblock%}
+{%block content%}
+<h1>'{{slug|transcat}}'</h1>
+{%if result.object_list%}
+<form action="./?page={{result.paginator.num_pages}}" method="get" id="sortbox">
+<select name="order">
+<option value="d"{%ifequal order "d"%} selected{%endifequal%}>Date</option>
+<option value="L"{%ifequal order "L"%} selected{%endifequal%}>Leechers Desc</option>
+<option value="l"{%ifequal order "l"%} selected{%endifequal%}>Leechers Asc</option>
+<option value="S"{%ifequal order "S"%} selected{%endifequal%}>Seeds Desc</option>
+<option value="s"{%ifequal order "s"%} selected{%endifequal%}>Seeds Asc</option>
+<option value="B"{%ifequal order "B"%} selected{%endifequal%}>Size Desc</option>
+<option value="b"{%ifequal order "b"%} selected{%endifequal%}>Size Asc</option>
+</select>
+<span class="minibutton"><span class="first-child">
+<button type="submit">Apply</button></span></span>
+</form>
+<table cellspacing="0" width="98%">
+<tr><th scope="col" width="12%">category</th>
+<th scope="col" width="66%">name</th>
+<th scope="col" width="8%">size</th>
+<th scope="col" width="6%">seeds</th>
+<th scope="col" width="8%">leechers</th></tr>
+{%for post in result.object_list reversed%}<tr {%if forloop.counter0|odd %} 'class="d"'{%endif%}>
+<td align="center">{%ifnotequal post.section slug%}
+<a title="{{post.section|transcat}} torrents" href="/sections/{{post.section}}/">{{post.section|transcat}}</a>
+{%else%}<b>{{post.section|transcat}}</b>{%endifnotequal%}
+{%if post.subcat|transcat and not post.subcat|equal:post.section%}<br>({%ifnotequal post.subcat slug%}<a title="{{post.subcat|transcat}} torrents" href="/sections/{{post.subcat}}/">{{post.subcat|transcat}}</a>{%else%}{{post.subcat|transcat}}{%endifnotequal%})</h4>{%endif%}
+</td>
+
+<td class="tlist">
+<span class="body">{%if is_open_tracker%}<h4 class="meta"><a title="{{post.title}}: download torrent" href="/torrent/{{post.id}}/">{%trans "download"%}</a>
+</h4>{%endif%}
+<a title="{{post.title}} torrent" href="/~{{post.author.username}}/{{post.slug}}/">{%if post.title|strlen|gt:"29"%}{{post.title|truncate:"30"}}..{%else%}{{post.title}}{%endif%}</a>
+</span>
+<span class="footer">
+{%if post.tags%}<h4 class="meta">
+{%for tag in post.tags|truncate:"3"%}<a title="{%trans "tag"%} {{tag.name}}: {{post.title}}" href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if post.tags|length|gt:"3"%} ..{%endif%}
+</h4>{%endif%}
+<h4 class="cmnts">
+{% get_comment_count for post as comment_count %}
+{%if comment_count%}
+<a title='"{{post.title}}" comments' href="/~{{post.author.username}}/{{post.slug}}/">
+{%trans "comments"%}: {{comment_count}}</a>
+{%endif%}
+</h4>
+</span>
+</td>
+<td align="right">{{post.torrent.bytes|measure}}</td>
+{% with post.torrent.id|get_peers as props %}
+<td align="right">{{props.0}}</td><td align="right">{{props.1}}</td>
+{% endwith %}
+
+</tr>{%endfor%}
+</table>
+
+{% load paginator %}{% paginator %}
+
+
+{%else%}<p><br><br>No torrents</p>
+{%endif%}
+{% endblock %}
+</div>
+</div>
+{%block right%}{%if result.object_list%}{%get_taglist%}{%if tags%}
+<div class="rnote"><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+    <h1>{%trans "tags in"%} '<a title="{{slug|transcat}}" href="/sections/{{slug}}/">{%trans slug%}</a>'</h1>
+    <p><br>
+    {%for tag in tags%}<a href="/tag/{{tag.name}}/" class="{%if tag.count|lt:"11"%}s1{%else%}{%if tag.count|lt:"20"%}s2{%else%}{%if tag.cloud|lt:"30"%}s3{%else%}{%if tag.cloud|lt:"50"%}s4{%else%}{%if tag.count|lt:"70"%}s5{%else%}{%if tag.count|lt:"100"%}s6{%else%}{%if tag.count|lt:"200"%}s7{%else%}s8{%endif%}{%endif%}{%endif%}{%endif%}{%endif%}{%endif%}{%endif%}">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}</p>
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div></div>
+{%endif%}{%endif%}{%endblock%}

@@ -1,0 +1,330 @@
+{% extends "users/auth.html" %}
+{%load i18n%}{%load logic%}{%load ls%}{%load markup%}
+{%block title%}{{form.instance.title}}{%endblock%}
+{%block post%}
+<li id="add"><a href="/add/" title="add post">{%trans "New post"%}</a></li>
+<li id="edit"><span>{%trans "Edit"%}</span></li>
+{%endblock%}
+{%block meta%}
+<link rel="stylesheet" type="text/css" href="/media/yui/button/assets/skins/sam/button.css">
+<link rel="stylesheet" type="text/css" href="/media/yui/container/assets/skins/sam/container.css">
+<script type="text/javascript" src="/media/yui/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="/media/yui/element/element-beta.js"></script>
+<script type="text/javascript" src="/media/yui/button/button-min.js"></script>
+<script type="text/javascript" src="/media/yui/dragdrop/dragdrop.js"></script>
+<script type="text/javascript" src="/media/yui/utilities/utilities.js"></script>
+<script type="text/javascript" src="/media/yui/container/container.js"></script>
+<style type="text/css" media="screen">
+.left {
+width: 72%;
+}
+.yui-button#addtags button {
+ background: url(/media/add.gif) center center no-repeat;
+ text-indent: -4em;
+ overflow: hidden;
+ padding: 0 .75em;
+ width: 2em;
+ *margin-left: 4em;   /* IE only */
+ *padding: 0 1.75em;  /* IE only */
+}
+.yui-button {font-size: 1.2em;}
+#id_text{width: 400px;}
+
+#scr_btn {
+clear: both;
+float: left;
+text-align: left;
+margin: 0.5em 0 0 220px;
+}
+iframe {border: 0;clear:both;width:320px;}
+</style>
+<script type="text/javascript">
+var curcat = '{{form.curcat}}';
+function cssjs(a,o,c1,c2){
+  switch (a){
+    case 'swap':
+      o.className=!cssjs('check',o,c1)?o.className.replace(c2,c1):o.className.replace(c1,c2);
+      break;
+    case 'add':
+      if(!cssjs('check',o,c1)){o.className+=o.className?' '+c1:c1;}
+	break;
+    case 'remove':
+      var rep=o.className.match(' '+c1)?' '+c1:c1;
+      o.className=o.className.replace(rep,'');
+      break;
+    case 'check':
+      return new RegExp('\\b'+c1+'\\b').test(o.className)
+      break;
+  }
+}
+var tohide = {'anime': ['imdb', 'artist', 'album', 'company'],
+'books': ['artist', 'album', 'year', 'company', 'tube', 'imdb', 'screenshot'],
+'games': ['imdb', 'artist', 'album'],
+'movies': ['artist', 'album', 'company'],
+'music': ['screenshot', 'imdb', 'company', 'lngs', 'tube'],
+'pics': ['imdb', 'artist', 'album', 'year', 'company', 'tube'],
+'tv': ['artist', 'album', 'company'],
+'misc': ['screenshot', 'imdb', 'artist', 'album', 'year', 'company', 'tube', 'lngs']
+}
+var toshow = {'anime': ['year', 'tube', 'lngs', 'screenshot'],
+'books': ['lngs'],
+'games': ['screenshot', 'year', 'company', 'lngs', 'tube'],
+'movies': ['screenshot', 'imdb', 'year', 'tube', 'lngs'],
+'music': ['album', 'artist', 'year'],
+'pics': ['lngs'],
+'tv': ['screenshot', 'imdb', 'year', 'tube', 'lngs'],
+}
+function jtocat(item, dflt){
+var root = document.getElementById('subsubwrap');
+var subsub = document.getElementById('subsub');
+for(var i=0;i<tohide[item.value].length;i++){
+ e = document.getElementById(tohide[item.value][i]);
+ cssjs('add', e, 'hidden');
+}
+
+if(item.value == 'misc'){
+subsub.removeAttribute("name");
+root.style.display = 'none';
+return;
+};
+for(var i=0;i<toshow[item.value].length;i++){
+ e = document.getElementById(toshow[item.value][i]);
+ cssjs('remove', e, 'hidden');
+}
+subsub.parentNode.removeChild(subsub);
+
+subsub = document.createElement("select");
+subsub.id = 'subsub'
+root.appendChild(subsub);
+
+subsub.setAttribute("name", item.value);
+
+var ti = document.getElementById(item.value);
+if(!ti) return;
+
+var opts = ti.getElementsByTagName('option');
+for(var i=0;i<opts.length;i++){
+ o = document.createElement('option');
+ o.setAttribute('value', opts[i].value);
+ if(dflt==opts[i].value){
+  o.setAttribute("selected", "selected");
+ }
+ o.innerHTML = opts[i].firstChild.data;
+ subsub.appendChild(o);
+}
+root.style.display = 'inline';
+}
+
+var loading = function(){}
+
+YAHOO.util.Event.onContentReady("markup", function () {
+var tpanel = new YAHOO.widget.Panel("panel", { width:"320px", visible:false, xy:[300,250], constraintoviewport:true } );
+tpanel.setHeader("{%trans "Tags in category"%} '{{ form.curcat|transcat }}'");
+tpanel.render();
+
+loading = function(pg){
+tpanel.show();
+tpanel.setBody("<img src=\"/media/loading.gif\">");
+tpanel.render();
+var callback = {
+ success : function(o) {
+  var res = o.responseXML.documentElement;
+  var msg = res.getElementsByTagName('msg');
+  if(msg.length!=0){
+  if(msg[0].firstChild.nodeValue == 'success'){
+  var ls = res.getElementsByTagName('tag');
+  var colors = ['#6A5ACD', '#6B8E23', '#708090', '#778899', '#4169E1', '#4682B4', '#483D8B', '#4B0082', '#556B2F', '#5F9EA0', '#6495ED', '#66CDAA', '#696969', '#7B68EE', '#7CFC00', '#7FFF00', '#800000', '#800080', '#808000', '#808080', '#8A2BE2', '#8B0000', '#8B008B', '#8B4513', '#8FBC8F', '#90EE90', '#9370D8', '#9400D3', '#9932CC', '#9ACD32', '#A0522D', '#A52A2A', '#A9A9A9', '#ADD8E6', '#ADFF2F', '#B0C4DE', '#B22222', '#B8860B', '#BA55D3', '#BC8F8F', '#BDB76B', '#000000', '#000080', '#00008B', '#0000CD', '#0000FF', '#006400', '#008000', '#008080', '#008B8B', '#00BFFF', '#00CED1', '#00FA9A', '#00FF00', '#191970', '#1E90FF', '#20B2AA', '#228B22', '#2E8B57', '#2F4F4F', '#32CD32', '#3CB371', '#C0C0C0', '#C71585', '#CD5C5C', '#CD853F', '#D2691E', '#D2B48C', '#D87093', '#DA70D6', '#DAA520', '#DC143C', '#DDA0DD', '#DEB887', '#E9967A', '#EE82EE', '#F08080', '#F0E68C', '#F4A460', '#F5DEB3', '#FA8072', '#FF0000', '#FF00FF', '#FF1493', '#FF4500', '#FF6347', '#FF69B4', '#FF7F50', '#FF8C00', '#FFA07A', '#FFA500'];
+  var txt = '';
+  for(var i=0;i<ls.length;i++){
+  txt+='<a onClick=\"document.editform.tags.value+=\''+(document.editform.tags.value.length==0?'':',')+ls[i].firstChild.nodeValue+'\';return false;\" style=\"'+colors[Math.round(92*Math.random())]+'\" href=\"#\">'+ls[i].firstChild.nodeValue+'</a> ('+ls[i].getAttribute("n")+')';
+  if(i+1!=ls.length){txt+=', ';}
+  }
+  tpanel.setBody(txt.length==0?'NOTHING':txt);
+  var n = parseInt(res.getElementsByTagName('pages')[0].firstChild.nodeValue);
+  var page = parseInt(res.getElementsByTagName('page')[0].firstChild.nodeValue);
+  if(n>1){
+  var pnumbers = [];
+  var leading = trailing = false;
+  var oleading = otrailing = [];
+   if(n<13){
+    leading = trailing = true
+    for(var i=1;i<n+1;i++){if(i>0&&i<=n) pnumbers.push(i);}
+   }else if(page<=8){
+    leading = true
+    for(var i=1;i<11;i++){if(i>0&&i<=n) pnumbers.push(i);}
+    oleading = [n, n-1];
+   }else if(page>n-8){
+    trailing = true;
+    for(var i=n-10+1;i<n+1;i++){if(i>0&&i<=n) pnumbers.push(i);}
+    otrailing = [1,2];
+   }else{
+    for(var i=page-4;i<page+5;i++){if(i>0&&i<=n) pnumbers.push(i);}
+    oleading = [n, n-1];
+    otrailing = [1,2];
+   }
+  var ptxt = "";
+  if(trailing.length==0||trailing == false){
+  for(var i=0;i<oleading.length;i++){
+   ptxt += "<a title='0' href='#' onclick='loading("+oleading[i]+");return false;'>"+oleading[i]+"</a>&nbsp;";
+  }
+  ptxt+="...&nbsp;";
+  }
+  for(var i=pnumbers.length-1;i>=0;i--){
+   if(pnumbers[i]==page){ptxt+=pnumbers[i]+"&nbsp;";
+   }else{
+    ptxt+="<a title='1' href='#' onclick='loading("+pnumbers[i]+");return false;'>"+pnumbers[i]+"</a>&nbsp;";
+   }
+  }
+  if(leading.length==0||leading == false){
+  ptxt+="...&nbsp;";
+  for(var i=otrailing.length-1;i>=0;i--){
+  ptxt+="<a title='2' href='#' onclick='loading("+otrailing[i]+");return false;'>"+otrailing[i]+"</a>&nbsp;";
+  }
+  }
+  tpanel.setFooter(ptxt);
+  }
+  }else {tpanel.setBody("{%trans "Something gone wrong"%}");}
+  }else {tpanel.setBody("{%trans "Something gone wrong"%}");}
+  tpanel.render();
+  tpanel.show();
+ },
+ failure : function(o) {
+  tpanel.setBody('<b>{%trans "CONNECTION FAILED"%}</b>');
+  tpanel.render();
+  tpanel.show();
+ }
+}
+if(!parseInt(pg))pg="";
+else pg="page-"+pg+"/";
+var conn = YAHOO.util.Connect.asyncRequest("GET", "/xmltags/"+curcat+"/"+pg, callback);
+}
+
+var at = new YAHOO.widget.Button("tagc", { id:"addtags"});
+YAHOO.util.Event.addListener("addtags", "click", loading, tpanel, true);
+var groot = document.getElementById("cats");
+var h = document.getElementById("form-sub");
+h.removeAttribute("name");
+h.id = "hidden";
+h.setAttribute("class", "hidden");
+//--
+var sub = document.createElement("div");
+sub.id="subwrapper";
+sub.innerHTML = '<select name="section" id="sub" onChange="jtocat(this);">{{form.section}}</select>';
+groot.appendChild(sub);
+
+subsubwrap = document.createElement('div');
+subsubwrap.id = 'subsubwrap';
+subsubwrap.style.display = 'none';
+
+var subsub = document.createElement("select");
+subsub.id = 'subsub';
+subsubwrap.appendChild(document.createTextNode(' > '));
+subsubwrap.appendChild(subsub);
+sub.appendChild(subsubwrap);
+so = document.getElementById('sub').getElementsByTagName('option');
+var co = '{{form.curcat}}';
+if(!co) co = 'misc';
+for(var i=0;i<so.length;i++){
+ if(so[i].value == co){
+  jtocat(so[i], '{{form.instance.subcat}}');
+  break;
+ }
+}
+});
+</script>
+{%endblock%}
+
+{%block body%}<body id="editpost" class="yui-skin-sam">{%endblock%}
+
+{%block content%}
+<div id="panel"><div class="bd">&nbsp;</div></div>
+
+<h1>{{form.instance.title}}</h1>
+<form action="." name="editform" method="POST" enctype="multipart/form-data">
+<div id="markup">
+<div id="torrent" class="row"><label for="id_torrent">.torrent file<b>:</b>{%if form.instance.torrent%}<br><span class="gray">{{form.instance.torrent.fn}}</span>{%endif%}{%if form.torrent.errors%}<br><span class="error">{{form.torrent.errors}}<br></span>{%endif%}</label>{{form.torrent}}<br></div>
+<div class="row"><label for="id_poster">{{form.poster.label}}<b>:</b>{%if form.poster.errors%}<span class="error"><br>{{form.poster.errors}}</span>{%endif%}</label>{{form.poster}}<br></div>
+
+<div id="title" class="row"><label for="id_title">{{form.title.label}}<b>:</b>{%if form.title.errors%}<br><span class="error"><br>{{form.title.errors}}</span>{%endif%}</label>{{form.title}}<br></div>
+<div id="tags" class="row"><span style="float:left;"><label for="id_tags">{{form.tags.label}}<b>:</b>{%if form.tags.errors%}<br><span class="error">{{form.tags.errors}}</span>{%endif%}</label><input id="id_tags" value="{%if form.instance.tags%}{%for tag in form.instance.tags%}{{tag}}{%if not forloop.last%}, {%endif%}{%endfor%}{%endif%}" type="text" maxlength="255" name="tags"></span><div id="tagc"></div><br></div>
+
+<div class="row"><label>&nbsp;</label>{% autoescape off %}{{form.text|bbcode}}{% endautoescape %}</div>
+<div id="post_type" class="row"><label for="id_section">{%trans "category"%}<b>:</b>{%if form.section.errors%}<span class="erorr">{{form.section.errors}}</span>{%endif%}</label>
+<div id="cats"><select id="form-sub" name="section">
+<optgroup label="{%trans "Anime"%}" id="anime">{{form.anime}}</optgroup>
+<optgroup label="{%trans "Books"%}" id="books">{{form.books}}</optgroup>
+<optgroup label="{%trans "Games"%}" id="games">{{form.games}}</optgroup>
+<optgroup label="{%trans "Movies"%}" id="movies">{{form.movies}}</optgroup>
+<optgroup label="{%trans "Music"%}" id="music">{{form.music}}</optgroup>
+<optgroup label="{%trans "Pictures"%}" id="pics">{{form.pics}}</optgroup>
+<optgroup label="{%trans "TV"%}" id="tv">{{form.tv}}</optgroup>
+<option value="misc">{%trans "Miscellaneous"%}</option></select>
+</div></div>
+<div id="company" class="row"><label for="id_company">{{form.company.label}}<b>:</b>{%if form.company.errors%}<br><span class="error"><br>{{form.company.errors}}<br></span>{%endif%}</label>{{form.company}}<br></div>
+<div id="imdb" class="row"><br><label for="id_imdb">{{form.imdb.label}}<b>:</b>{%if form.imdb.errors%}<br><span class="error"><br>{{form.imdb.errors}}</span><br>{%endif%}</label><input id="id_imdb" type="text" name="imdb" value='{{form.instance.attrs|key:"imdb"}}'><br><br></div>
+<div id="artist" class="row"><label for="id_artist">{{form.artist.label}}<b>:</b>{%if form.artist.errors%}<br><span class="error"><br>{{form.artist.errors}}<br></span>{%endif%}</label>{{form.artist}}<br></div>
+<div id="album" class="row"><br><label for="id_album">{{form.album.label}}<b>:</b>{%if form.album.errors%}<br><span class="error"><br>{{form.album.errors}}<br></span>{%endif%}</label>{{form.album}}<br></div>
+<div id="year" class="row"><br><label for="id_year">{{form.year.label}}<b>:</b>{%if form.year.errors%}<br><span class="error"><br>{{form.year.errors}}<br></span>{%endif%}</label><input id="id_year" type="text" maxlength="4" name="year" value='{{form.instance.attrs|key:"year"}}' style="width:3em;"><br></div>
+
+<div id="tube" class="row"><label for="id_tube">{{form.tube.label}}<b>:</b>{%if form.tube.errors%}<span class="error"><br>{{form.tube.errors}}</span><br>{%endif%}</label>{{form.tube}}<br></div>
+<div id="lngs" class="row"><label for="id_lngs">{{form.lngs.label}}<b>:</b>{%if form.lngs.errors%}<br><span class="error"><br>{{form.lngs.errors}}</span>{%endif%}</label>{{form.lngs}}<br></div>
+<div id="featured" class="rr"><label>{{form.featured.label}}<b>:</b></label>Yes&nbsp;<input type="radio" name="featured" value="yes" {%if form.instance.attrs|key:"featured"|equal:"True"%}checked="checked"{%endif%}>No<input type="radio" name="featured" value="no" {%if not form.instance.attrs|key:"featured"|equal:"True"%}checked="checked"{%endif%}><br></div>
+<div id="notify" class="rr"><label>{{form.notify.label}}<b>:</b></label>Yes&nbsp;<input type="radio" name="notify" value="yes" {%if form.instance.attrs|key:"notify"|equal:"True"%}checked="checked"{%endif%}>No<input type="radio" name="notify" value="no" {%if not form.instance.attrs|key:"notify"|equal:"True"%}checked="checked"{%endif%}><br></div>
+<div class="sb"><label>&nbsp;</label><span class="button"><span class="first-child"><button type="submit">{%trans "Write"%}</button></span></span></div>
+
+</div></form><br>
+
+<h1>{{form.instance.title}}</h1>
+<div class="article"><div class="body">
+<p class="imageleft"><img src="/media/iposter/{{form.instance.poster}}"></p>
+<p>{%if form.instance.attrs|key:"country"%}{%trans "country"%}<b>:</b> {{form.instance.attrs|key:"country"}}<br>{%endif%}
+{%if form.instance.attrs|key:"artist"%}{%trans "artist"%}<b>:</b> {{form.instance.attrs|key:"artist"}}<br>{%endif%}
+{%if form.instance.attrs|key:"album"%}{%trans "album"%}<b>:</b> {{form.instance.attrs|key:"album"}}<br>{%endif%}
+{%if form.instance.attrs|key:"year"%}{%trans "year"%}<b>:</b> {{form.instance.attrs|key:"year"}}<br>{%endif%}
+{%if form.instance.attrs|key:"company"%}{%trans "company"%}<b>:</b> {{form.instance.attrs|key:"company"}}<br>{%endif%}
+{%if form.instance.attrs|key:"tube"%}{%trans "video"%}<b>:</b> <a href="{{form.instance.attrs|key:"tube"}}">URL</a><br>{%endif%}
+{%if form.instance.attrs|key:"lngs"%}{%trans "languages"%}<b>:</b> {{form.instance.attrs|key:"lngs"}}<br>{%endif%}
+{%if form.instance.attrs|key:"imdb"%}IMDB <b>:</b> <a href="{{form.instance.attrs|key:"imdb"}}">URL</a><br>{%endif%}
+<br>{% autoescape off %}{{form.instance.text|bbcode}}{% endautoescape %}</p>
+<div id="screenshot" class="hidden"><span id="scrs"></span>
+<br><iframe id="scr_iframe" name="scr_iframe" src="/upload_scr/{{form.instance.id}}/"></iframe>
+</div>
+</div>
+<div class="torrentbar"><p>.torrent: <a href="/torrent/{{form.instance.torrent.id}}/?redirect=/~{{user.username}}/{{form.instance.slug}}/">{%trans "download"%}</a></p></div>
+<div class="footer"><h4 class="meta">{%trans "section"%}: </h4><p>'{{form.curcat|transcat}}'</p>
+<h4 class="meta">{%trans "tags"%}: </h4><p>{%for tag in form.instance.tags|truncate:"3"%}<a href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if form.instance.tags|length|gt:"3"%} ..{%endif%}</p>
+</div>
+
+<br><br><br><br><br>
+{%endblock%}
+{%block right%}
+<div class="rnote"><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+  <p>{%trans "After confirming by moderator post can not be changed"%}.</p>
+  </div>
+  <div class="round"><div class="roundbl"><span></span></div>
+   <div class="roundbr"><span></span></div><span class="clearer"></span>
+  </div>
+</div>
+
+<div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+  <p><a href="/tq/ls/">{%trans "Add to transoding queue" %} &raquo;</a></p>
+  </div>
+  <div class="round"><div class="roundbl"><span></span></div>
+   <div class="roundbr"><span></span></div><span class="clearer"></span>
+  </div>
+</div>
+
+</div>
+{%endblock%}

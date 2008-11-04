@@ -1,0 +1,5 @@
+{% load i18n %}{% trans "Use this URL to change you password" %}:
+
+http://{{site}}/users/chpw/{{key}}
+
+{% trans "This url becomes invalid in {{expiration_days}}." %}

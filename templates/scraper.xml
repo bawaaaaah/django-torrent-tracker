@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scraper>{%load ls%}{%load logic%}
+{% scrape %}
+<leechers>{{info|key:"leechers"}}</leechers>
+<seeds>{{info|key:"seeds"}}</seeds>
+<downloaded>{{info|key:"downloaded"}}</downloaded>
+</scraper>

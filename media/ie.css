@@ -1,0 +1,6 @@
+#top {
+ border-top: 7px solid #000 !important;
+}
+input.textfield, textarea, .OpenIdLabel, fieldset input, #id_person_name, #id_image {
+ margin-bottom: 0 !important;
+}

@@ -1,0 +1,33 @@
+{% extends "users/auth.html" %}
+{%load i18n%}{%load logic%}
+{%block title%}{%trans "New post"%}{%endblock%}
+{%block meta%}
+<style type="text/css" media="screen">
+#id_title, #id_tags {width:16em;} .yui-button {font-size: 1.2em;}
+#id_text {width: 400px;}
+</style>
+{%endblock%}
+
+{%block post%}
+<li id="add"><span>{%trans "New post"%}</span></li>
+{%endblock%}
+{%block body%}<body id="newpost">{%endblock%}
+{%block content%}
+{%if message%}<p>{{message}}</p>{%endif%}
+{%if form%}
+<form action="/add/" method="POST" enctype="multipart/form-data">
+<div class="row"><label for="id_torrent">{{form.torrent.label}}<b>:</b>{%if form.torrent.errors%}<span class="error"><br />{{form.torrent.errors}}</span>{%endif%}</label>{{form.torrent}}<br/></div>
+<div class="row"><br/><label for="id_title">{{form.title.label}}<b>:</b>{%if form.title.errors%}<span class="error"><br />{{form.title.errors}}<br /></span>{%endif%}</label>{{form.title}}<br /></div>
+<div class="row"><br/><label for="id_tags">{{form.tags.label}}<b>:</b>{%if form.tags.errors%}<span class="error"><br />{{form.tags.errors}}</span><br />{%endif%}</label>{{form.tags}}<br /></div>
+<div class="row"><br/><label for="submit">&nbsp;</label>{{form.text}}<br />
+{%if form.text.errors%}<span class="error">{{form.text.errors}}</span>{%endif%}<br /></div>
+
+<div class="row"><label for="id_poster">{{form.poster.label}}<b>:</b>{%if form.poster.errors%}<span class="error"><br />{{form.poster.errors}}</span>{%endif%}</label>{{form.poster}}<br /></div>
+<div class="row"><br /><br /><label for="submit">&nbsp;</label>
+<span class="button"><span class="first-child">
+<button type="submit">{%trans "Next"%}</button></span></span>
+<br /><br /><br /><br /></div>
+</form>
+{%endif%}
+{%endblock%}
+{%block right%}{%endblock%}

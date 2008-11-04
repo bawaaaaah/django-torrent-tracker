@@ -1,0 +1,93 @@
+{%load i18n%}{%load logic%}{%load ls%}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+<title>{%block title%}{%endblock%}</title>
+<meta name="MSSmartTagsPreventParsing" content="true" />
+<meta http-equiv="imagetoolbar" content="no" />
+<meta name="description" content="open bittorrent tracker" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta http-equiv="Content-Language" content="en-us" />
+<meta http-equiv="imagetoolbar" content="no" />
+<link REL="SHORTCUT ICON" HREF="/media/favicon.png" />
+<style type="text/css" media="screen">@import "/media/df.css";
+.left {width: 72%}
+</style>
+{%block meta%}{%endblock%}
+</head>
+{%block body%}<body id="first">{%endblock%}
+<div id="top">
+<div id="header">
+<ul id="nav">
+<li id="home"><a href="/" title="~/">~/</a></li>
+{%block post%}
+{% if user.is_authenticated %}
+<li id="add"><a href="/add/" title="add post">{%trans "New post"%}</a></li>
+{%endif%}
+{%endblock%}
+{%block bbs%}<li id="forum"><a href="/bbs/">{%trans "BBS"%}</a></li>{%endblock%}
+{%block rarea%}
+{% if user.is_authenticated %}
+<li id="profile"><a href="/~{{user.username}}/" title="{%trans "my profile"%}">{{user.name}}</a></li>
+<li id="logout"><a href="/logout/" title="logout">{%trans "Logout"%}</a></li>
+{%else%}
+<li id="login"><a href="/login/" title="login">{%trans "Login"%}</a></li>
+<li id="signup"><a href="/signup/" title="signup">{%trans "Registration"%}</a></li>
+{%endif%}
+{%endblock%}
+</ul>
+</div>
+{%block search%}
+<form action="/search-results/" method="get"><fieldset class="searchbar">
+<input  name="phrase" type="text" {%if query%}value="{{query}}"{%endif%} />
+<span class="button"><span class="first-child">
+<button type="submit">search</button></span></span>
+</fieldset></form>
+{%endblock%}
+</div>
+
+<div class="left">
+<div class="content">
+{%block content%}
+{%load posts_summary%}{% summary %}
+{% endblock %}
+</div>
+</div>
+{%block right%}<div class="rnote"><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+    <p>{{site_name}} &mdash; {%trans "open bittorrent tracker"%}.</p>
+    <p><a title="{%trans "End User License Agreement"%}" href="/eula/">{%trans "Usage policy"%}</a>,
+    <a title="Frequently Asked Questions" href="/faq/">FAQ</a>.
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+  <p>{%trans "<a title='Browse categories' href='/sections/'>Browse</a> categories."%}</p>
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div></div>
+
+{%endblock%}
+{%block footer%}
+<div class="footer">&copy; 2007-2008 <a href="http://0x2a-dc.com/">0x2a-dc.com</a>.</div>
+{%endblock%}
+</body>
+</html>

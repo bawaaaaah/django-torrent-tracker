@@ -1,0 +1,19 @@
+{% extends "users/auth.html" %}
+{% load i18n %}
+{% block title %}{% trans "Password change" %}{% endblock %}
+{%block body%}<body>{%endblock%}
+{% block content %}
+<h1>{% trans 'Password change' %}</h1><br><br>
+{%if form.username%}
+<p>{% trans "Specify your e-mail or username, and I'll send URL for changing the password." %}</p>
+{%endif%}
+{%if error_message%}<ul class="errorlist"><li>{{error_message}}</li></ul>{%endif%}
+<form action="/chpw/" method="POST">
+<div class="row"><br/><label for="id_username">{%trans "Username"%}<b>:</b>{%if form.username.errors%}<span class="error">{{form.username.errors}}</span>{%endif%}</label>{{form.username}}</div>
+<div class="row"><br/><label for="id_email">e-mail<b>:</b>{%if form.email.errors%}<span class="error">{{form.email.errors}}</span>{%endif%}</label>{{form.email}}</div>
+<div class="row" style="margin-left:2px;"><br><label>&nbsp;</label><span class="button">
+<span class="first-child"><button type="submit">{%trans "Submit"%}</button></span></span></div>
+</form>
+{% endblock %}
+{%block right%}{%endblock%}
+{%block footer%}{%endblock%}

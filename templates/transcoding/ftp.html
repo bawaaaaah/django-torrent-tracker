@@ -1,0 +1,135 @@
+{% extends "users/auth.html" %}
+{%load i18n%}
+{%block title%}{%trans "FTP directory contents"%}{%endblock%}
+{%block meta%}
+<style type="text/css">
+#treewrapper {background: #fff; position:relative;}
+#treediv {position:relative; width:100%; background: #fff; padding:1em;}
+.icon-snd { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -253px no-repeat; }
+.icon-rar { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -289px no-repeat; }
+.icon-png { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -325px no-repeat; }
+.icon-txt { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -180px no-repeat; }
+.icon-tar { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -578px no-repeat; }
+.icon-tgz { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -36px no-repeat; }
+.icon-stf { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -144px no-repeat; }
+.icon-doc { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -72px no-repeat; }
+.icon-pdf { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -470px no-repeat; }
+.icon-iso { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -506px no-repeat; }
+.icon-dir { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -362px no-repeat; }
+.icon-deb { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -396px no-repeat; }
+.icon-avi { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -433px no-repeat; }
+.icon-app { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -542px no-repeat; }
+.icon-vid { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 0px no-repeat; }
+.icon-zip { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -216px no-repeat; }
+.icon-unk { display:block; padding-left: 20px; background: transparent url(/media/icons.png) 0 -108px no-repeat; }
+table,td{border: 0 !important;}
+</style>
+<link rel="stylesheet" type="text/css" href="/media/yui/button/assets/skins/sam/button.css" />
+<script type="text/javascript" src="/media/yui/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="/media/yui/element/element-beta.js"></script>
+<script type="text/javascript" src="/media/yui/button/button-min.js"></script>
+{%endblock%}
+{%block post%}
+<li id="add"><a href="/tq/ls/" title="add post">{%trans "New post"%}</a></li>
+<li id="edit"><span>{%trans "Edit"%}</span></li>
+{%endblock%}
+{%block body%}<body id="editpost" class="yui-skin-sam">{%endblock%}
+{%block content%}{%load ls%}{%load logic%}
+<h1 class="path">{%if not ls|empty%}<a href="/tq/ls/">~/</a>{%else%}~/{%endif%}
+{%for p in path|splitpath%}
+    {%if not forloop.last%}
+	{%if p%}
+	    <a href="/tq/ls/{{path|mergepath:forloop.counter}}">{{p}}</a>
+	{%endif%}{%if not forloop.first%} / {%endif%}
+    {%else%}
+	{{p|basename}}
+    {%endif%}
+{%endfor%}</h1><br><br>
+
+{%if user.attrs|key:"posts"|equal:1%}<p>{%trans "Since it is first post, you need to attach file."%}{%if ls|empty%}. {%trans "Upload it to"%} <a href="ftp://{{user.username}}@10.8.129.53/">ftp://{{user.username}}@80.93.122.35/</a>{%endif%}</p>{%endif%}
+<div id="markup"><form action="/tq/add_files/" method="POST" name="ftp">{{form.key}}
+{%if form.ls%}
+{%if not ls|empty%}<p><input id="submit" type="submit" name="submit" value='{%trans "Submit"%}'>
+</p>{%endif%}
+    <table cellspacing="0" cellpadding="0" border="0">
+    {%for r in form|unfold%}<tr>
+	<td id="{{r.0.size}}">{{r.1}}</td>
+	<td><a {%if r.2%}href="/tq/ls/{{r.0|relpath}}" class="icon-dir">{{r.0|basename}}{%else%}href="#" onClick="return false;" class="{{r.0.icon}}" title="size: {{r.0.size|measure}}">{{r.0.name|basename}}{%endif%}</a></td>
+	</tq>
+    {%endfor%}
+    </table>
+</form></div>
+<div id="sum"><hr>{%trans "Selected"%}<b>:</b> <span id="size">0</span></div>
+<script type="text/javascript">
+YAHOO.util.Event.onContentReady("markup", function () {
+f = document.ftp.getElementsByTagName('input');
+var bc = new YAHOO.widget.Button("submit", { type: "submit", name: '{%trans "Submit"%}'});
+function ischkd(){
+flag = true;
+for(var i=0;i<f.length;i++){
+if(f[i].id.substring(0,7) == 'id_file'){
+if(f[i].checked){flag=false;}
+}
+}
+//document.getElementById('submit').disabled=flag;
+bc.set('disabled', flag);
+}
+ischkd();
+function sum(e){
+ischkd();
+sum = 0;
+for(var i=0;i<f.length;i++){
+if(f[i].id.substring(0,7) == 'id_file'){
+if(f[i].checked){sum+=parseInt(f[i].parentNode.id);}
+}
+}
+var s = document.getElementById('sum');
+s.removeChild(document.getElementById('size'));
+var n = document.createElement('span')
+n.id = 'size';
+
+if(sum<1024){sum = sum%1024+" {%trans "bytes"%}"}
+else if(sum<1024*1024){sum = (sum/1024).toFixed(0)+" {%trans "KB"%}"}
+else if(sum<1024*1024*1024){sum = (sum/(1024*1024)).toFixed(0)+" {%trans "MB"%}"}
+else sum = (sum/(1024*1024*1024)).toFixed(3)+" {%trans "GB"%}"
+
+n.appendChild(document.createTextNode(sum));
+s.appendChild(n);
+}
+
+for(var i=0;i<f.length;i++){
+if(f[i].id.substring(0,7) == 'id_file'){
+YAHOO.util.Event.addListener(f[i].id, "click", sum);
+}
+}
+});
+</script>
+{%else%}
+{%if form.ls%}
+<form action="/tq/files_add/" method="POST" name="ftp">{{form}}
+<p><input id="submit" type="submit" name="submit" value='{%trans "Submit"%}'><br></p>
+</form>
+<script type="text/javascript">
+YAHOO.util.Event.onContentReady("markup", function () {
+var bc = new YAHOO.widget.Button("submit", { type: "submit", name: "{%trans "Submit"%}" });
+});
+</script>{%endif%}
+{%endif%}
+</body>{%endblock%}
+{% block right %}
+<div class="rnote"><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+  <p>{%trans "Try later if you don't see your uploaded files. Probably this is because youre uploading something right now."%}</p>
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div></div>
+{%endblock%}

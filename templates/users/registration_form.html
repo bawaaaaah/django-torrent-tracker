@@ -1,0 +1,18 @@
+{% extends "users/auth.html" %}
+{%load i18n%}
+{% block title %}{%trans "Registration"%}{% endblock %}
+{%block rarea%}
+<li id="login"><a href="/login/" title="login">{%trans "Login"%}</a></li>
+<li id="signup"><span>{%trans "Registration"%}</span></li>
+{%endblock%}
+{%block body%}<body id="registration">{%endblock%}
+{% block content %}
+<form method="POST" action="/signup/">
+<div class="row"><label for="id_username">{%trans "nickname"%}<b>:</b>{%if form.errors%}<br><span class="error">{{form.username.errors}}</span>{%endif%}</label>{{form.username}}</div>
+<div class="row"><br><br><label for="email">{%trans "email"%}<b>:</b>{%if form.email.errors%}<br><span class="error">{{form.email.errors}}</span>{%endif%}</label>{{form.email}}<br></div>
+<div class="row"><br><br><label for="password1">{%trans "password"%}<b>:</b>{%if form.password1.errors%}<br><span class="error">{{form.password1.errors}}</span><br>{%endif%}</label> {{form.password1}}<br></div>
+<div class="row"><br><br><label for="password2">{%trans "password again"%}<b>:</b>{%if form.password2.errors%}<br><span class="error">{{form.password2.errors}}</span><br>{%endif%}</label> {{form.password2}}<br></div>
+<div class="row" style="margin-left:2px;"><br><br><label>&nbsp;</label><span class="button"><span class="first-child">
+<button type="submit">{%trans "Register"%}</button></span></span></div>
+</form>
+{% endblock %}

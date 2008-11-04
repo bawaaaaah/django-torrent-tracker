@@ -1,0 +1,45 @@
+{%load i18n%}
+<html><head>
+<style>
+table {
+ border: black 1px solid;
+ border-collapse: collapse;
+ padding: 0;
+ margin: 0;
+}
+
+table th {
+ border: black 1px solid;
+background: white;
+margin:0;
+padding:0;
+}
+
+table td {
+ border: black 1px solid;
+ padding-left: 1em;
+ padding-right: 1em;
+}
+.imageleft {
+  float: left;
+  display: inline;
+  margin: 1em 1em 1em 0;
+}
+</style>
+</head><body>{%load logic%}
+{%if not items%}<h1>No new torrents</h1>{%else%}
+<table><tr><td>author</td><td>thread</td><td>text</td><td>action</td></tr>
+{%for post in items%}<tr>
+<td><a href="/~{{post.author.username}}/">{{post.author.name}}</td>
+<td><a href="/bbs/topics/{{post.thread.slug}}/">{{post.thread.subject}}</a></td>
+<td><p>{%if post.image%}<a href="/media/iposter/{{post.image}}">{%endif%}
+{{post.text}}</p>IP<b>:</b> {{post.ip}}</td>
+<td><a href="/admin/delete/posts/{{post.id}}/">delete</a><br>
+<a href="/admin/edit/posts/{{post.id}}/">edit</a>
+</td>
+</tr>{%endfor%}
+</table>
+{% load paginator %}{% paginator %}
+{%endif%}
+</body>
+</html>

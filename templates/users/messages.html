@@ -1,0 +1,40 @@
+{% extends "users/auth.html" %}
+{%load i18n%}{% load logic %}
+{% block title %}{{user.name}}@{{site_domain}}{% endblock %}
+{%block body%}<body>{%endblock%}
+
+{% block content %}
+<h1>{{title}}</h1><br><br>
+{%if not result.object_list%}<p>{%trans "No messages"%}.</p>{%else%}
+{%for msg in result.object_list%}
+<p>{%trans "To"%}<b>:</b> {%for rcpt in msg.rcpt.all%}{%if rcpt.id|equal:user.id%}{{rcpt.name}}{%else%}<a title="{{rcpt.name}}" href="/~{{rcpt.username}}/">{{rcpt.name}}</a>{%endif%}{%if not forloop.last%}, {%endif%}{%endfor%}<br>
+{%trans "Subject"%}<b>:</b> {{msg.subj}}<br>
+{%trans "Message"%}<b>:</b> {{msg.body}}
+</p>
+{%if not forloop.last%}<hr>{%endif%}
+{%endfor%}
+{%endif%}
+{% endblock %}
+
+{%block right%}{%if user.attrs|key:"inbox"%}
+<div id="rnote" class="rnote"><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+  {%ifequal page_id "received"%}
+  <p class="meta"><a href="/messages/sent/">{%trans "Sent messages"%}</a></p>
+  {%else%}
+  <p class="meta"><a href="/messages/received/">{%trans "Received messages"%}</a> ({{user.attrs|key:"inbox"}})</p>
+  {%endifequal%}
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div></div>{%endif%}
+{% endblock %}
+{%block footer%}{%endblock%}

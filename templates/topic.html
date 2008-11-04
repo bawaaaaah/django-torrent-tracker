@@ -1,0 +1,348 @@
+{% extends "index.html" %}
+{%load i18n%}{%load comments%}{%load logic%}{%load ls%}{%load humanize%}{%load markup%}
+{%if user.is_authenticated%}{%load recaptcha%}{%endif%}
+{%block title%}{{post.title}}{%endblock%}
+{%block meta%}{%ifequal post.section "video"%}<script type="text/javascript" src="/media/swfobject.js"></script>{%endifequal%}
+<script type="text/javascript" src="/media/yui/yahoo/yahoo-min.js"></script>
+<script type="text/javascript" src="/media/yui/event/event-min.js"></script>
+<script type="text/javascript" src="/media/yui/connection/connection-min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="/media/yui/button/assets/skins/sam/button.css" />
+<script type="text/javascript" src="/media/yui/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="/media/yui/element/element-beta.js"></script>
+<script type="text/javascript" src="/media/yui/button/button-min.js"></script>
+{%include "highslide.htm"%}
+<style type="text/css" media="screen">@import "/media/rating.css";</style>
+<style type="text/css" media="screen">
+div.el, form {clear: both;}
+div.el label {
+ float: left;
+ text-align: right;
+ padding-top: 0.2em;
+ margin-right: 10px;
+}
+textarea {
+ float: left;
+ text-align: left;
+ margin-bottom: 0;
+ margin-top: 0;
+ border: 2px solid #ddd;
+ color: #777;
+ background-color: #f6f6f6;
+ font-size: 1.8em;
+ width: 98%;
+}
+</style>
+{%endblock%}
+{%block body%}<body class="yui-skin-sam">{%endblock%}
+{%block content%}
+
+<div id="markup" class="article"><br>
+<h1>{{post.title}}</h1>
+<p class="meta">
+{%if not post.approved and user.id|equal:post.author.id%}
+<h4>{%trans "not approved yet"%}</h4>{%endif%}
+{%if post.author.id|equal:user.id and not post.approved%}
+{%if not user.is_superuser%}
+ <a href="/edit/{{post.id}}/">{%trans "Edit"%}</a>
+{%endif%}
+{%endif%}
+{%if user.is_superuser%}
+ <a href="/admin/edit/topics/{{post.id}}/">{%trans "Edit"%}</a>
+{%endif%}
+</p>
+
+<div class="body">
+<p class="imageleft"><a title="{{post.title}} torrent" class="highslide" href="/media/poster/{{post.poster}}" onclick="return hs.expand(this)">
+<img title="{{post.title}}" src="/media/iposter/{{post.poster}}" /></a></p>
+<p><b>{%trans "added"%}:</b> {{post.created|naturalday}} {%trans "by"%} <a title="{{post.author.name}}: {{post.title}} torrent" href="/~{{post.author.username}}/">{{post.author.name}}</a><br>
+<b>{%trans "size"%}:</b> {{post.torrent.bytes|measure}}<br>
+{% with post.torrent.id|get_peers as props %}
+<b>seeds:</b> {{props.0}}<br>
+<b>leechers:</b> {{props.1}}<br>
+{% endwith %}
+{%if post.attrs|key:"country"%}{%trans "country"%}<b>:</b> {{post.attrs|key:"country"}}<br />{%endif%}
+{%if post.attrs|key:"artist"%}{%trans "artist"%}<b>:</b> {{post.attrs|key:"artist"}}<br />{%endif%}
+{%if post.attrs|key:"album"%}{%trans "album"%}<b>:</b> {{post.attrs|key:"album"}}<br />{%endif%}
+{%if post.attrs|key:"year"%}{%trans "year"%}<b>:</b> {{post.attrs|key:"year"}}<br />{%endif%}
+{%if post.attrs|key:"company"%}{%trans "company"%}<b>:</b> {{post.attrs|key:"company"}}<br />{%endif%}
+{%if post.attrs|key:"tube"%}{%trans "video"%}<b>:</b> <a href="{{post.attrs|key:"tube"}}" title="{{post.title}}">URL</a><br />{%endif%}
+{%if post.attrs|key:"lngs"%}{%trans "languages"%}<b>:</b> {{post.attrs|key:"lngs"}}<br />{%endif%}
+{%if post.attrs|key:"imdb"%}IMDB <b>:</b> <a href="{{post.attrs|key:"imdb"}}" title="{{post.title}}">URL</a><br />{%endif%}
+<br /><b>description:</b><br>{% autoescape off %}{{post.text|bbcode}}{% endautoescape %}</p>
+{%ifequal post.section "video"%}
+{%if post.attrs|key:"videos"|length|gt:"0"%}
+{%if post.attrs|key:"videos"|retr:"0"|vfexists%}
+<div id="daplayer" class="imageleft">
+<embed type="application/x-shockwave-flash" src="/media/dfplayer.swf" id="flvplayer" name="flvplayer" bgcolor="#ffffff" quality="high"
+flashvars="config={ playList: [ {overlayId: 'play' },
+{ url: 'http://{{site_domain}}/media/flvs/{{post.attrs|key:"videos"|retr:"0"}}' } ],
+initialScale: 'scale', scaleSplash: false, showFullScreenButton: false,
+splashImageFile: 'PlayButtonBig.png'}"
+height="240" width="320">
+<!--skinImagesBaseURL: "http://{{site_domain}}/media/flvskin/"
+ menuItems: [true, false, true, true, true, true],
+  autoBuffering: true, autoPlay: false, autoRewind: false,
+  loop: false, showLoopButton: false,
+ -->
+</div>{%endif%}{%endif%}{%endifequal%}
+{%if post.attrs|key:"scrs"%}{%trans "Screenshots"%}<b>:</b><p>{%for scr in post.attrs|key:"scrs"%}<a class="highslide" href="/media/scr/{{scr}}" onclick="return hs.expand(this)">
+<img title="{{post.title}}" src="/media/iscr/{{scr}}"></a>{%endfor%}</p>{%endif%}
+{%if post.attrs|key:"files"%}
+<code>{%trans "Files"%}<b>:</b><br>{%for file in post.attrs|key:"files"%}{{file.size|measure}}&nbsp;"{{file.name|basename}}"{%if not forloop.last%}<br>{%endif%}{%endfor%}</code>
+{%endif%}
+</div>
+<div class="torrentbar"><p>.torrent: <a title="{{post.torrent.fn}}" href="/torrent/{{post.torrent.id}}/?redirect=/~{{post.author.username}}/{{post.slug}}/">{%if not user.is_authenticated and not is_open_tracker%}{%trans "login and download"%}{%else%}{%trans "download"%}{%endif%}</a></p></div>
+<div class="footer"><h4 class="meta">{%trans "section"%}: </h4><p><a title="{{post.section|transcat}} torrent" href="/sections/{{post.section}}/">{{post.section|transcat}}</a>{%if not post.section|equal:post.subcat%} &gt; <a href="/sections/{{post.subcat}}/" title="{{post.section|transcat}}: {{post.subcat|transcat}}: {{post.title}} torrent">{{post.subcat|transcat}}</a>{%endif%}</p>
+{%if post.tags%}<h4 class="meta">{%trans "tags"%}: </h4><p>{%for tag in post.tags|truncate:"3"%}<a title="{{post.title}} {{tag.name}}" href="/tag/{{tag.name}}/">{{tag.name}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}{%if post.tags|length|gt:"3"%} ..{%endif%}</p>{%endif%}
+{% get_comment_count for post as comment_count %}
+{%if comment_count%}
+<h4 class="meta">{%trans "Comments"%}: {{comment_count}}</h4>{%endif%}
+<span id="votes">{%if post.rate_count%}{%trans "ratings"%}<b>:</b>&nbsp;{{post.rate_count}}{%endif%}&nbsp;</span>
+<span class="rating"><span id="poor"><a href="#">( &gt;&lt;)</a></span>&nbsp;&nbsp;&nbsp;<span id="boring"><a href="#">(。_゜)</a></span>&nbsp;&nbsp;&nbsp;<span id="good"><a href="#">( ^_^)</a></span>&nbsp;&nbsp;&nbsp;<span id="cool"><a href="#">( ﾟ▽ﾟ)</a></span>&nbsp;&nbsp;&nbsp;<span id="awesome"><a href="#">Ｏ(≧∇≦)Ｏ</a></span></span>
+</div>
+</div>
+<script type="text/javascript">
+YAHOO.util.Event.onContentReady("markup", function () {
+var rates = {'poor': 1, 'boring': 2, 'good': 3, 'cool': 4, 'awesome': 5}
+var rrates = {1: 'poor', 2: 'boring', 3:'good', 4: 'cool', 5: 'awesome'}
+var data = "post={{post.id}}&rating=0";
+
+function rmas(k){
+ item = document.getElementById(k);
+ if(item){
+  as = item.getElementsByTagName('a')
+  if(as) {
+   txt = as[0].firstChild.nodeValue;
+   parent = as[0].parentNode;
+   parent.appendChild(document.createTextNode(txt))
+   parent.removeChild(as[0]);
+  }
+  YAHOO.util.Event.removeListener(k,'click');
+ }
+}
+
+var callback = {
+success: function(o){
+var r = o.responseXML.documentElement.getElementsByTagName('rating');
+if(r.length >0){
+votes = parseInt(r[0].firstChild.nodeValue);
+if(votes==0){{%if not user.is_authenticated%}for(k in rates){rmas(k);}{%endif%}return;}
+avg = parseInt(r[0].getAttribute("avg"));
+document.getElementById("votes").firstChild.nodeValue = "{%trans "ratings"%}: "+votes;
+if(avg in [1,2,3,4,5]) {
+ el = document.getElementById(rrates[avg]);
+ el.setAttribute('class', 'chosen');
+}
+for(k in rates){
+  if(rates[k]!=avg){document.getElementById(k).removeAttribute('class');}
+  else{ document.getElementById(k).setAttribute('class','chosen');}
+ {%if post.author.attrs|key:"votes"|key:post.id%}
+  rmas(k);
+ {%endif%}
+}
+}
+},
+failure: function(o){
+for(k in rates){
+  rmas(k);
+}
+}
+}
+
+function onRate(e){
+{%if user.is_authenticated and not post.author.attrs|key:"votes"|key:post.id%}
+data = "post={{post.id}}&rating="+(e?rates[YAHOO.util.Event.getTarget(e).parentNode.id]:0);
+var conn = YAHOO.util.Connect.asyncRequest("POST", "/rate/", callback, data);
+for(k in rates){rmas(k);}
+YAHOO.util.Event.preventDefault(e);
+{%else%}YAHOO.util.Event.preventDefault(e);
+{%endif%}
+}
+YAHOO.util.Event.on("poor", "click", onRate);
+YAHOO.util.Event.on("boring", "click", onRate);
+YAHOO.util.Event.on("good", "click", onRate);
+YAHOO.util.Event.on("cool", "click", onRate);
+YAHOO.util.Event.on("awesome", "click", onRate);
+
+var conn = YAHOO.util.Connect.asyncRequest("POST", "/rate/", callback, data);
+
+hs.graphicsDir = '/media/';
+hs.outlineType = 'rounded-white';
+});
+</script>
+
+
+{% get_comment_list for post as comment_list %}
+<script type="text/javascript">
+YAHOO.util.Event.onContentReady("commentform", function () {
+var bc = new YAHOO.widget.Button("preview_submit", { value: '{%trans "Preview"%}' });
+});
+</script>
+{%if comment_list%}<br><br>
+<div id="commentslist">
+<ul>{% for comment in comment_list %}
+<li class="comment by-guest"><p class="meta"><strong>{{comment.person_name}}</strong> on <em>{{comment.submit_date}}</em>{%if user.is_staff%}<em> IP<b>:</b> {{comment.ip_address}}, <a href="/admin/delete/comment/{{comment.id}}/?redirect=/~{{post.author.username}}/{{post.slug}}/">delete comment</a></em>{%endif%}</p>
+<div class="body"><p>{{comment.comment}}</p></div>
+</li>
+{%endfor%}</ul>
+</div>{%endif%}
+
+<div id="commentform">
+<div {%if not post.attrs|key:"thanks"%} style="display:none;"{%endif%}>
+{%trans "Thanks"%}<b>:</b> <span id="tnx_v">&nbsp;{{post.attrs|key:"thanks"}}</span>
+</div>
+<div id="thxbtn"></div>
+{% if not post.created|add_days:"60"|is_expired or not comment_count %}
+
+{% get_comment_form for post as form %}
+<form action="/comments/post/" method="post"><fieldset>
+<div class="el"><label for="id_name">{% trans "name" %}:</label><br><br>{{form.name}}<br><br></div>
+<div class="el"><label for="id_email">{% trans "email" %}:</label><br><br>{{form.email}}<br><br></div>
+<div class="el"><label for="id_url">{% trans "URL" %}:</label><br><br>{{form.url}}</div>
+<div class="el"><label for="id_comment">{% trans "Comment" %}:</label><br><br><textarea name="comment" id="id_comment" rows="5" cols="60"></textarea><br><br></div>
+<div style="clear:both;">{% recaptcha %}{%if msg%}<br><p class="error">{{msg}}</p>{%endif%}</div><br><br>
+
+<input type="hidden" name="target" value="/~{{post.author.username}}/{{post.slug}}/" />
+<div class="el"><br><input type="submit" id="preview_submit" name="post" value="{% trans "Leave comment" %}" /></div>
+{{form.content_type}}
+{{form.object_pk}}
+{{form.timestamp}}
+{{form.security_hash}}
+</fieldset></form>
+{%endif%}
+</div><br><br>
+{%endblock%}
+{%block right%}
+{%if post.tags%}
+<div id="rnote" class="rnote"><div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+  <p>{%trans "Author"%}<b>:</b> <a title="{{post.author.profile}}" href="/~{{post.author.username}}/">{{post.author.name}}</a></p>
+  <p class="meta">{%trans "Joined"%}<b>:</b> {{post.author.date_joined|timesince}} {%trans "ago"%}</p>
+  <p class="meta">{%trans "Torrents"%}<b>:</b> {{post.author.attrs|key:"posts"}}</p>
+  {%if user.is_authenticated and not user.id|equal:post.author.id%}<br />
+  <div id="subs_markup"></div><br />
+  <p><a title="leave message for {{post.author.name}}" href="/leave_message/{{post.author.id}}/">{%trans "Leave message for"%} {{post.author.name}}</a></p>
+  {% endif %}
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div>{%if post.tags|length|gt:"3"%}<div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">
+    <h1>{%trans "Tags"%}</h1>
+    {%load tag_list%}{%get_taglist%}
+    {%for tag in tags%}<a title="{{tag.name}}" href="/tag/{{tag.name}}/" class="{%if tag.count|lt:"11"%}s1{%else%}{%if tag.count|lt:"20"%}s2{%else%}{%if tag.cloud|lt:"30"%}s3{%else%}{%if tag.cloud|lt:"50"%}s4{%else%}{%if tag.count|lt:"70"%}s5{%else%}{%if tag.count|lt:"100"%}s6{%else%}{%if tag.count|lt:"200"%}s7{%else%}s8{%endif%}{%endif%}{%endif%}{%endif%}{%endif%}{%endif%}{%endif%}">{{tag.name|cutstr:"24"}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}
+  </div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div>
+{%endif%}<div class="right">
+  <div class="round">
+    <div class="roundtl"><span></span></div>
+    <div class="roundtr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+  <div class="subnav">{% spaceless %}
+  {%if post.author.id|equal:user.id%}<h1>'{%trans post.section%}'</h1><br />
+  {% load bulletin %}{% get_bulletin %}{%if bulletin %}
+  {%for i in bulletin%}<p><a class="highslide" href="/media/poster/{{i.poster}}" onclick="return hs.expand(this)">
+  <img title="{{i.title}}" src="/media/iposter/{{i.poster}}"></a>
+  <br><a title="{{i.title}}" href="/~{{i.author.username}}/{{i.slug}}/">
+  {%if i.title|strlen|gt:33%}{{i.title|cutstr:"32"}}..{%else%}{{i.title}}{%endif%}</a></p>{%if not forloop.last%}<br>{%endif%}{%endfor%}
+  {%endif%}
+  {%else%}
+  <p><a title="{%trans "All torrents of"%} {{post.author.name}}" href="/~{{post.author.username}}/posts/">{%trans "All torrents"%}</a> {%trans "of"%}</a> {{post.author}} ({{post.author.attrs|key:"posts"}})</p>
+  {%endif%}
+  {% endspaceless %}</div>
+  <div class="round">
+    <div class="roundbl"><span></span></div>
+    <div class="roundbr"><span></span></div>
+    <div class="clearer"><span></span></div>
+  </div>
+</div>
+</div>
+{%if user.is_authenticated and not user.id|equal:post.author.id%}
+<script type="text/javascript">
+YAHOO.util.Event.onContentReady("rnote", function () {
+{%if user.attrs|key:"beats"|inlist:post.author.id%}var state='unsubscribe'
+{%else%}var state='subscribe'
+{%endif%};
+
+function fail(){
+e = document.getElementById('subscription').parentNode;
+m = document.createElement('span');
+m.appendChild(document.createTextNode("{%trans "Something gone wrong. Try later."%}"));
+m.setAttribute("class", "error");
+e.appendChild(m);
+}
+
+function onSubs(e){
+sb.set('disabled', true);
+
+var callback = {
+success: function(o){
+result = o.responseXML.documentElement.getElementsByTagName('msg');
+if(result.length>0){
+if(result[0].firstChild.nodeValue=='success'){
+sb.set('label', state=='subscribe'?'{%trans "Unubscribe"%}':'{%trans "Subscribe"%}');
+state = state=="subscribe"?"unsubscribe":"subscribe";
+sb.set('disabled', false);
+}else{fail();return;}
+}else{fail();return;}
+},
+failure: function(o){fail();}
+}
+var conn = YAHOO.util.Connect.asyncRequest("GET", "/subscribe/?uid={{post.author.id}}&xhr=1", callback);
+YAHOO.util.Event.preventDefault(e);
+}
+var sb = new YAHOO.widget.Button({container:"subs_markup", id: "sbtn", label: state=='subscribe'?'{%trans "Subscribe"%}':'{%trans "Unsubscribe"%}', onclick: {fn: onSubs}});
+{%if not user.attrs|key:"thanks"|inlist:post.id%}
+function rmtnxbtn(){
+torm = document.getElementById("thxbtn");
+if(!torm) return;
+torm.parentNode.removeChild(torm);
+}
+
+function onTnx(e){
+tnx.set('disabled', true);
+
+var tcallback = {
+success: function(o){
+root = o.responseXML.documentElement;
+result = root.getElementsByTagName('msg');
+if(result.length>0){
+if(result[0].firstChild.nodeValue=='success'){
+var tv = document.getElementById('tnx_v');
+tv.firstChild.data = root.getElementsByTagName('number')[0].firstChild.nodeValue;
+tv.parentNode.style.display = "inline";
+}
+}
+rmtnxbtn();
+},
+failure: function(o){rmtnxbtn();}
+}
+var conn = YAHOO.util.Connect.asyncRequest("GET", "/tnx/{{post.id}}/", tcallback);
+}
+
+var tnx = new YAHOO.widget.Button({container:"thxbtn", id: "tnxbtn", label: "{%trans "Thanks"%}", onclick: {fn: onTnx}});
+{%endif%}
+})
+</script>{%endif%}
+{%endif%}
+{%endblock%}
