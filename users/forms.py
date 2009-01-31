@@ -18,7 +18,7 @@ class AuthForm(forms.Form):
 	self.session = session
     
     def _site_url(self):
-	return 'http://%s' %s settings.SITE_DOMAIN
+	return 'http://%s'%settings.SITE_DOMAIN
   
     def clean_openid_url(self):
 	from users.util import get_consumer

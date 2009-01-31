@@ -119,7 +119,7 @@ def edit(request, the_id):
     topic = get_object_or_404(Topic, pk=the_id)
     if not request.user == topic.author:
 	return HttpResponseForbidden('Permission denied')
-    if topic.approved:
+    if topic.approved and settings.CENSORSHIP:
 	return HttpResponseForbidden('This post approved by moderator and you cannot change it.')
     if request.method == 'POST':
 	form = TopicEditForm(request.POST, request.FILES, instance=topic)

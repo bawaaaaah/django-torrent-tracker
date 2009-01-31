@@ -228,7 +228,7 @@ class Topic(models.Model):
 	self.attrs = Dict(self)
     author = models.ForeignKey(User)
     title = models.CharField(max_length=255, verbose_name=_("title"))
-    slug = models.SlugField(db_index=True, blank=True, null=True)
+    slug = models.SlugField(db_index=True, blank=True, null=True, unique=True)
     text = models.TextField()
     poster = models.CharField(max_length=255, verbose_name=_("poster"))
     approved = models.BooleanField(default=False)

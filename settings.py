@@ -12,7 +12,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-DATABASE_NAME = 'df'             # Or path to database file if using sqlite3.
+DATABASE_NAME = ''             # Or path to database file if using sqlite3.
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
@@ -158,8 +158,8 @@ SEARCH_CRAWLERS = (
 )
 
 # I don't want to store this in db
-SITE_DOMAIN = '127.0.0.1'
-SITE_NAME = '127.0.0.1'
+SITE_DOMAIN = '0xdf.net'
+SITE_NAME = '0xdf'
 
 FILE_UPLOAD_TEMP_DIR = '/home/grey/src/df/store/temp'
 

@@ -248,7 +248,7 @@ for(var i=0;i<so.length;i++){
 <div id="title" class="row"><label for="id_title">{{form.title.label}}<b>:</b>{%if form.title.errors%}<br><span class="error"><br>{{form.title.errors}}</span>{%endif%}</label>{{form.title}}<br></div>
 <div id="tags" class="row"><span style="float:left;"><label for="id_tags">{{form.tags.label}}<b>:</b>{%if form.tags.errors%}<br><span class="error">{{form.tags.errors}}</span>{%endif%}</label><input id="id_tags" value="{%if form.instance.tags%}{%for tag in form.instance.tags%}{{tag}}{%if not forloop.last%}, {%endif%}{%endfor%}{%endif%}" type="text" maxlength="255" name="tags"></span><div id="tagc"></div><br></div>
 
-<div class="row"><label>&nbsp;</label>{% autoescape off %}{{form.text|bbcode}}{% endautoescape %}</div>
+<div class="row"><label>&nbsp;</label>{% autoescape off %}{{form.instance.text|bbcode}}{% endautoescape %}</div>
 <div id="post_type" class="row"><label for="id_section">{%trans "category"%}<b>:</b>{%if form.section.errors%}<span class="erorr">{{form.section.errors}}</span>{%endif%}</label>
 <div id="cats"><select id="form-sub" name="section">
 <optgroup label="{%trans "Anime"%}" id="anime">{{form.anime}}</optgroup>
