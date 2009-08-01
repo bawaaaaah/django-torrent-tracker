@@ -1,0 +1,64 @@
+{% extends "board/base_forum.html" %}
+{% load extras %}{% load i18n %}{% load paginator %}
+{% load logic %}
+
+{% block snapboard_main %}
+    <div class="index_title">
+    <h2 style="font-size: 152%;">
+    {{ title }}
+    </h2>
+    </div>
+
+{% with result.object_list as threads %}
+    {% if threads %}
+        {% for thread in threads %}
+        <div class="thread">
+            <p style="margin-top: 10px; margin-bottom: 5px;">
+                <span style="color: #999; font-size: small; float:right;">
+                    {{ thread.post_count }} {% trans "posts started by" %} <b>{{ thread.starter }}</b>
+                </span>
+                <span style="font-size: 100%;">
+                    <b>
+                        {% if thread.gsticky %}
+                        {% trans "STICKY" %}
+						{% else %}
+							{% if category and thread.csticky %}
+							{% trans "STICKY" %}
+							{% endif %}
+                        {% endif %}
+                        {% if thread.closed %}
+                        {% trans "CLOSED" %}
+                        {% endif %}
+                        <a href="/bbs/threads/id/{{thread.id}}">{{ thread.subject }}</a>
+                    </b>
+                </span>
+            </p>
+            <span style="color: #677; font-size: small; float:right;">
+                {% trans "last updated" %}
+                <span class="datetime">{{ thread.date|date:"r T" }}<span class="timestamp">{{ thread.date|timestamp }}</span></span>
+                {% ifnotequal thread.last_poster thread.starter %}
+                {% trans "by" %} {{ thread.last_poster }}
+                {% endifnotequal %}
+            </span>
+            <span style="color: #888; padding-left: 2em; font-size:small;">
+                {% trans "category" %}:
+                <a href="/bbs/threads/category/{{thread.category.id}}/">
+                    {{ thread.category }}
+                </a>
+            </span>
+        </div>
+        {% endfor %}
+        {% if result.paginator.num_pages|gt:"1" %}
+	{% paginator %}
+	{%endif%}
+
+    {% else %}
+        <p>{% trans "No threads are available." %}</p>
+    {% endif %}
+
+{% endwith %}
+
+{% endblock %}
+<!--
+vim: ai ts=4 sts=4 et sw=4 
+-->

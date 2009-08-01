@@ -1,0 +1,110 @@
+{% load i18n %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>{%block title%}{%endblock%}</title>
+<link type="text/css" rel="stylesheet" href="/media/reset-fonts-grids.css" />
+<link type="text/css" rel="stylesheet" href="/media/form.css" />
+<link type="text/css" rel="stylesheet" href="/media/board.css" />
+<link type="text/css" rel="stylesheet" href="/media/nav.css" />
+<style type="text/css" media="screen">@import "/media/df.css";
+.left {width: 72%}
+</style>
+
+<link rel="alternate" type="application/rss+xml" title="RSS" href="/bbs/feeds/latest/" />
+
+    {# this is required for some javascript rpc functions #}
+    <script type="text/javascript">
+        var SNAPBOARD_URLS = {
+            'rpc_preview': '/bbs/rpc/preview/',
+            'rpc_action': '/bbs/rpc/action/',
+            'rpc_postrev': '/bbs/rpc/postrev/'
+        };
+        var SNAP_POST_FILTER = '{{ SNAP_POST_FILTER }}';
+    </script>
+    {# gotta come first #}
+    <script type="text/javascript" src="/bbs/jsi18n/"></script>
+    <script src="/media/yui/yahoo-dom-event.js" type="text/javascript"></script>
+    <script src="/media/yui/connection-min.js" type="text/javascript"></script>
+    <script src="/media/yui/thread.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        YAHOO.util.Event.onDOMReady(procAllTimeSince);
+    </script>
+    {% block snap_extra_head %}{% endblock %}
+</head>
+
+<body id="yahoo-com" class="snapboard">
+<div id="top">
+<div id="header">
+<ul id="nav">
+<li id="home"><a href="/" title="~/">~/</a></li>
+{% if user.is_authenticated %}<li id="add"><a href="/add/" title="add post">{% trans "New post" %}</a></li>{% endif %}
+<li id="forum"><a href="/bbs/">{%trans "BBS"%}</a></li>
+{% block rarea %}
+{% if user.is_authenticated %}
+<li id="profile"><a href="/~{{user.username}}/" title="{%trans "my profile"%}">{{user.name}}</a></li>
+<li id="logout"><a href="/logout/" title="logout">{%trans "Logout"%}</a></li>
+{% else %}
+<li id="login"><a href="/login/" title="login">{%trans "Login"%}</a></li>
+<li id="signup"><a href="/signup/" title="signup">{%trans "Registration"%}</a></li>
+{% endif %}
+{% endblock %}
+</ul>
+</div>
+</div>
+
+
+
+<div id="doc2" class="yui-t4"><!-- "doc" here for example only; use any page width -->
+<div class="snapboard">
+    <div id="hd">
+        <br />
+        <div id="navigation">
+            <ul>
+                <li><a href="/bbs/"><span>{% trans "All Discussions" %}</span></a></li>
+                <li><a href="/bbs/categories/"><span>{% trans "Categories" %}</span></a></li>
+                {% if user.is_authenticated %}
+                <li><a href="/bbs/favorites/"><span>{% trans "Favorites" %}</span></a></li>
+                <li><a href="/bbs/private/"><span>{% trans "Private Posts" %}</span></a></li>
+                {% if thr %}
+                <li><a href="/bbs/threads/category/{{thr.category.id }}/"><span style="color: red;">{% trans "Start Thread" %}</span></a></li>
+                {% endif %}
+                {% if category %}
+                <li><a href="/threads/category/{{category.id }}/"><span style="color: red;">{% trans "Start Thread" %}</span></a></li>
+                {% endif %}
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    <hr />
+
+    <div id="bd">
+        <div id="yui-main">
+            <div class="yui-b">
+                {% if messages %}
+                    <div class="messagelist">
+                        <ul class="messagelist">
+                            {% for msg in messages %}
+                                <li>{{ msg }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %} 
+                {% block snapboard_header %}
+                {% endblock %}
+                {% block snapboard_main %}
+                {% endblock %}
+            </div>
+        </div>
+        <div class="yui-b">
+            {% block snapboard_panel %}
+                {% include "board/include/side_panel.html" %}
+            {% endblock %}
+        </div>
+
+    </div>
+</div>
+</div>
+</body>
+</html>
