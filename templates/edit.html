@@ -1,62 +1,26 @@
 {% extends "users/auth.html" %}
-{%load i18n%}{%load logic%}{%load ls%}{%load markup%}
+{% load i18n %}{% load logic %}{% load ls %}{% load markup %}
 {%block title%}{{form.instance.title}}{%endblock%}
 {%block post%}
 <li id="add"><a href="/add/" title="add post">{%trans "New post"%}</a></li>
 <li id="edit"><span>{%trans "Edit"%}</span></li>
 {%endblock%}
 {%block meta%}
-<link rel="stylesheet" type="text/css" href="/media/yui/button/assets/skins/sam/button.css">
-<link rel="stylesheet" type="text/css" href="/media/yui/container/assets/skins/sam/container.css">
-<script type="text/javascript" src="/media/yui/yahoo-dom-event/yahoo-dom-event.js"></script>
-<script type="text/javascript" src="/media/yui/element/element-beta.js"></script>
-<script type="text/javascript" src="/media/yui/button/button-min.js"></script>
-<script type="text/javascript" src="/media/yui/dragdrop/dragdrop.js"></script>
-<script type="text/javascript" src="/media/yui/utilities/utilities.js"></script>
-<script type="text/javascript" src="/media/yui/container/container.js"></script>
+<script type="text/javascript" src="/media/jq/jquery.js"></script>
+<script type="text/javascript" src="/media/jq/tag.js"></script>
 <style type="text/css" media="screen">
-.left {
-width: 72%;
-}
-.yui-button#addtags button {
- background: url(/media/add.gif) center center no-repeat;
- text-indent: -4em;
- overflow: hidden;
- padding: 0 .75em;
- width: 2em;
- *margin-left: 4em;   /* IE only */
- *padding: 0 1.75em;  /* IE only */
-}
-.yui-button {font-size: 1.2em;}
-#id_text{width: 400px;}
-
-#scr_btn {
-clear: both;
-float: left;
-text-align: left;
-margin: 0.5em 0 0 220px;
-}
+.left {width: 72%;}
 iframe {border: 0;clear:both;width:320px;}
+span.tagMatches span {
+padding: 2px;
+margin-right: 4px;
+background-color: #0000AB;
+color: #fff;
+cursor: pointer;
+}
 </style>
 <script type="text/javascript">
 var curcat = '{{form.curcat}}';
-function cssjs(a,o,c1,c2){
-  switch (a){
-    case 'swap':
-      o.className=!cssjs('check',o,c1)?o.className.replace(c2,c1):o.className.replace(c1,c2);
-      break;
-    case 'add':
-      if(!cssjs('check',o,c1)){o.className+=o.className?' '+c1:c1;}
-	break;
-    case 'remove':
-      var rep=o.className.match(' '+c1)?' '+c1:c1;
-      o.className=o.className.replace(rep,'');
-      break;
-    case 'check':
-      return new RegExp('\\b'+c1+'\\b').test(o.className)
-      break;
-  }
-}
 var tohide = {'anime': ['imdb', 'artist', 'album', 'company'],
 'books': ['artist', 'album', 'year', 'company', 'tube', 'imdb', 'screenshot'],
 'games': ['imdb', 'artist', 'album'],
@@ -78,8 +42,7 @@ function jtocat(item, dflt){
 var root = document.getElementById('subsubwrap');
 var subsub = document.getElementById('subsub');
 for(var i=0;i<tohide[item.value].length;i++){
- e = document.getElementById(tohide[item.value][i]);
- cssjs('add', e, 'hidden');
+ $('#'+tohide[item.value][i]).addClass('hidden');
 }
 
 if(item.value == 'misc'){
@@ -88,8 +51,7 @@ root.style.display = 'none';
 return;
 };
 for(var i=0;i<toshow[item.value].length;i++){
- e = document.getElementById(toshow[item.value][i]);
- cssjs('remove', e, 'hidden');
+ $('#'+tohide[item.value][i]).addClass('hidden');
 }
 subsub.parentNode.removeChild(subsub);
 
@@ -115,112 +77,22 @@ for(var i=0;i<opts.length;i++){
 root.style.display = 'inline';
 }
 
-var loading = function(){}
+$(document).ready(function(){
+$('#id_tags').tagSuggest({
+ url: '/rpc/tags/'+curcat+'/',
+ delay: 250
+});
 
-YAHOO.util.Event.onContentReady("markup", function () {
-var tpanel = new YAHOO.widget.Panel("panel", { width:"320px", visible:false, xy:[300,250], constraintoviewport:true } );
-tpanel.setHeader("{%trans "Tags in category"%} '{{ form.curcat|transcat }}'");
-tpanel.render();
-
-loading = function(pg){
-tpanel.show();
-tpanel.setBody("<img src=\"/media/loading.gif\">");
-tpanel.render();
-var callback = {
- success : function(o) {
-  var res = o.responseXML.documentElement;
-  var msg = res.getElementsByTagName('msg');
-  if(msg.length!=0){
-  if(msg[0].firstChild.nodeValue == 'success'){
-  var ls = res.getElementsByTagName('tag');
-  var colors = ['#6A5ACD', '#6B8E23', '#708090', '#778899', '#4169E1', '#4682B4', '#483D8B', '#4B0082', '#556B2F', '#5F9EA0', '#6495ED', '#66CDAA', '#696969', '#7B68EE', '#7CFC00', '#7FFF00', '#800000', '#800080', '#808000', '#808080', '#8A2BE2', '#8B0000', '#8B008B', '#8B4513', '#8FBC8F', '#90EE90', '#9370D8', '#9400D3', '#9932CC', '#9ACD32', '#A0522D', '#A52A2A', '#A9A9A9', '#ADD8E6', '#ADFF2F', '#B0C4DE', '#B22222', '#B8860B', '#BA55D3', '#BC8F8F', '#BDB76B', '#000000', '#000080', '#00008B', '#0000CD', '#0000FF', '#006400', '#008000', '#008080', '#008B8B', '#00BFFF', '#00CED1', '#00FA9A', '#00FF00', '#191970', '#1E90FF', '#20B2AA', '#228B22', '#2E8B57', '#2F4F4F', '#32CD32', '#3CB371', '#C0C0C0', '#C71585', '#CD5C5C', '#CD853F', '#D2691E', '#D2B48C', '#D87093', '#DA70D6', '#DAA520', '#DC143C', '#DDA0DD', '#DEB887', '#E9967A', '#EE82EE', '#F08080', '#F0E68C', '#F4A460', '#F5DEB3', '#FA8072', '#FF0000', '#FF00FF', '#FF1493', '#FF4500', '#FF6347', '#FF69B4', '#FF7F50', '#FF8C00', '#FFA07A', '#FFA500'];
-  var txt = '';
-  for(var i=0;i<ls.length;i++){
-  txt+='<a onClick=\"document.editform.tags.value+=\''+(document.editform.tags.value.length==0?'':',')+ls[i].firstChild.nodeValue+'\';return false;\" style=\"'+colors[Math.round(92*Math.random())]+'\" href=\"#\">'+ls[i].firstChild.nodeValue+'</a> ('+ls[i].getAttribute("n")+')';
-  if(i+1!=ls.length){txt+=', ';}
-  }
-  tpanel.setBody(txt.length==0?'NOTHING':txt);
-  var n = parseInt(res.getElementsByTagName('pages')[0].firstChild.nodeValue);
-  var page = parseInt(res.getElementsByTagName('page')[0].firstChild.nodeValue);
-  if(n>1){
-  var pnumbers = [];
-  var leading = trailing = false;
-  var oleading = otrailing = [];
-   if(n<13){
-    leading = trailing = true
-    for(var i=1;i<n+1;i++){if(i>0&&i<=n) pnumbers.push(i);}
-   }else if(page<=8){
-    leading = true
-    for(var i=1;i<11;i++){if(i>0&&i<=n) pnumbers.push(i);}
-    oleading = [n, n-1];
-   }else if(page>n-8){
-    trailing = true;
-    for(var i=n-10+1;i<n+1;i++){if(i>0&&i<=n) pnumbers.push(i);}
-    otrailing = [1,2];
-   }else{
-    for(var i=page-4;i<page+5;i++){if(i>0&&i<=n) pnumbers.push(i);}
-    oleading = [n, n-1];
-    otrailing = [1,2];
-   }
-  var ptxt = "";
-  if(trailing.length==0||trailing == false){
-  for(var i=0;i<oleading.length;i++){
-   ptxt += "<a title='0' href='#' onclick='loading("+oleading[i]+");return false;'>"+oleading[i]+"</a>&nbsp;";
-  }
-  ptxt+="...&nbsp;";
-  }
-  for(var i=pnumbers.length-1;i>=0;i--){
-   if(pnumbers[i]==page){ptxt+=pnumbers[i]+"&nbsp;";
-   }else{
-    ptxt+="<a title='1' href='#' onclick='loading("+pnumbers[i]+");return false;'>"+pnumbers[i]+"</a>&nbsp;";
-   }
-  }
-  if(leading.length==0||leading == false){
-  ptxt+="...&nbsp;";
-  for(var i=otrailing.length-1;i>=0;i--){
-  ptxt+="<a title='2' href='#' onclick='loading("+otrailing[i]+");return false;'>"+otrailing[i]+"</a>&nbsp;";
-  }
-  }
-  tpanel.setFooter(ptxt);
-  }
-  }else {tpanel.setBody("{%trans "Something gone wrong"%}");}
-  }else {tpanel.setBody("{%trans "Something gone wrong"%}");}
-  tpanel.render();
-  tpanel.show();
- },
- failure : function(o) {
-  tpanel.setBody('<b>{%trans "CONNECTION FAILED"%}</b>');
-  tpanel.render();
-  tpanel.show();
- }
-}
-if(!parseInt(pg))pg="";
-else pg="page-"+pg+"/";
-var conn = YAHOO.util.Connect.asyncRequest("GET", "/xmltags/"+curcat+"/"+pg, callback);
-}
-
-var at = new YAHOO.widget.Button("tagc", { id:"addtags"});
-YAHOO.util.Event.addListener("addtags", "click", loading, tpanel, true);
-var groot = document.getElementById("cats");
 var h = document.getElementById("form-sub");
 h.removeAttribute("name");
 h.id = "hidden";
 h.setAttribute("class", "hidden");
-//--
-var sub = document.createElement("div");
-sub.id="subwrapper";
-sub.innerHTML = '<select name="section" id="sub" onChange="jtocat(this);">{{form.section}}</select>';
-groot.appendChild(sub);
 
-subsubwrap = document.createElement('div');
-subsubwrap.id = 'subsubwrap';
-subsubwrap.style.display = 'none';
+$('#cats').append('<div id="subwrapper"><select name="section" id="sub" onChange="jtocat(this);">{{form.section}}</select></div>');
+$('#subwrapper').append('<div id="subsubwrap"></div>');
+$('#subsubwrap').hide()
+$('#subsubwrap').append('> <select id="subsub"></select>')
 
-var subsub = document.createElement("select");
-subsub.id = 'subsub';
-subsubwrap.appendChild(document.createTextNode(' > '));
-subsubwrap.appendChild(subsub);
-sub.appendChild(subsubwrap);
 so = document.getElementById('sub').getElementsByTagName('option');
 var co = '{{form.curcat}}';
 if(!co) co = 'misc';
@@ -312,6 +184,7 @@ for(var i=0;i<so.length;i++){
   </div>
 </div>
 
+{%if form.instance.slug%}
 <div class="right">
   <div class="round">
     <div class="roundtl"><span></span></div>
@@ -319,12 +192,13 @@ for(var i=0;i<so.length;i++){
     <div class="clearer"><span></span></div>
   </div>
   <div class="subnav">
-  <p><a href="/tq/ls/">{%trans "Add to transoding queue" %} &raquo;</a></p>
+  <p>URL: <a href="/~{{form.instance.author.username}}/{{form.instance.slug}}/">{{form.instance.title}}</a></p>
   </div>
   <div class="round"><div class="roundbl"><span></span></div>
    <div class="roundbr"><span></span></div><span class="clearer"></span>
   </div>
 </div>
+{% endif %}
 
 </div>
 {%endblock%}

@@ -1,0 +1,4 @@
+* multilanguage search does not work (switch to sphinx)
+* seems user can vote multiple times (to check)
+* BBS is fucked up beyond any recognition at the moment
+

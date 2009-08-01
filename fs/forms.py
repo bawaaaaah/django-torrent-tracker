@@ -52,15 +52,15 @@ def _clean_torrent(hsh):
     m = magic.open(magic.MAGIC_MIME)
     m.load()
     hsh = hsh.read()
-    if not m.buffer(hsh).endswith('x-bittorrent'):
+    if not 'x-bittorrent' in m.buffer(hsh):
 	m.close()
-	raise forms.ValidationError, _("Seems you've uploaded file that doesn't look like torrent.")
+	raise forms.ValidationError, _("Uploaded file doesn't look like torrent.")
     m.close()
     try:
 	# do not forget to add LimitRequestBody to apache config
 	hsh = bdecode(hsh)
     except ValueError:
-	raise forms.ValidationError, _("Seems you've uploaded file that doesn't look like torrent.")
+	raise forms.ValidationError, _("Uploaded file doesn't look like torrent.")
     hsh['announce'] = ANNOUNCE_URL
     hsh['modified-by'] = [SITE_NAME]
     if hsh.has_key('comment'):
@@ -166,10 +166,6 @@ class TopicEditForm(forms.ModelForm):
 	    raise forms.ValidationError(_("title is required"))
 	if title in [u'beats', u'posts'] or title.startswith(u'page-') or title.startswith(u'~'):
 	   raise forms.ValidationError(_("you need to change title"))
-	t = Topic.objects.filter(title=title, author=self.instance.author)
-	if t:
-	    if t[0].id != self.instance.id:
-		raise forms.ValidationError(_("Probably post with this title already exists."))
 	return title
 
     def clean_poster(self):
@@ -303,4 +299,3 @@ class ScreenshotForm(forms.Form):
 	l.append(fn)
 	self.topic.attrs['scrs'] = l
 	self.topic.save()
-

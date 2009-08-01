@@ -1,6 +1,7 @@
-from django.conf.urls.defaults import *
 from django.contrib.sitemaps import FlatPageSitemap
 from django.views.generic.simple import direct_to_template
+from django.conf.urls.defaults import *
+from django.contrib import admin
 
 from tagging.views import tagged_object_list
 
@@ -11,20 +12,23 @@ sitemaps = {
     'flat': FlatPageSitemap,
 }
 
+admin.autodiscover()
+
 urlpatterns = patterns('',
     (r'^$', direct_to_template, {'template': 'index.html'}),
     (r'^search-results/$', 'fs.views.search'),
-    (r'^subscribe/$', 'fs.views.subscribtion'),
-    (r'^tnx/(?P<the_id>\d+)/$', 'fs.views.tnx'),
     (r'^torrent/(?P<the_id>\d+)/$', 'fs.views.get_torrent'),
     (r'^contact/$', 'contacts.views.contact'),
     (r'^contact/thanks/$', direct_to_template, {'template': 'contacts/thanks.html'}),
     (r'^bbs/', include('board.urls')),
     (r'^comments/$', include('django.contrib.comments.urls')),
     (r'^comments/post/$', 'fs.views.comment'),
-    (r'^rate/$', 'fs.views.rate'),
-    (r'^xmltags/(?P<section>\w+)/$', 'fs.views.xml_tags'),
-    (r'^xmltags/(?P<section>\w+)/page-(?P<page>[\d]+)/$', 'fs.views.xml_tags'),
+
+    (r'^rpc/tags/(?P<section>\w+)/$', 'fs.views.rpc_tags'),
+    (r'^rpc/rate/$', 'fs.views.rate'),
+    (r'^rpc/subscribe/$', 'fs.views.rpc_subscribtion'),
+    (r'^rpc/tnx/$', 'fs.views.tnx'),
+
     (r'^edit/(?P<the_id>\d+)/$', 'fs.views.edit'),
     (r'^add/$', 'fs.views.new'),
     (r'^tq/', include('transcoding.urls')),
@@ -65,7 +69,6 @@ urlpatterns = patterns('',
     (r'^jsi18n/$', 'django.views.i18n.javascript_catalog',
 	{'packages': 'django.conf'}),
 
-    (r'^admin/', include('admin.urls')),
     (r'^feeds/', include('feed.urls')),
     (r'^announce', 'tracker.views.announce'),
     (r'^scrape', 'tracker.views.scrape'),
@@ -73,4 +76,7 @@ urlpatterns = patterns('',
     url(r'^sitemap.xml$', 'django.contrib.sitemaps.views.sitemap',
 	{'sitemaps': sitemaps}),
     (r'^upload_scr/(?P<the_id>[\d]+)/$', 'fs.views.upload_scr'),
+
+    (r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    (r'^admin/', include(admin.site.urls)),
 )

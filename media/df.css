@@ -53,7 +53,7 @@ ul#nav li a:hover {color: #F06;}
 #first #home a, #rubricator #categories a, #forum span,
 #registration #signup a, #registration #signup span, #auth #login a, #auth #login span, #about #help a, #account #profile a,
 #newpost #add a, #editpost #edit span, #newpost #add span, #tqm #tcq span,
-#bbs #forum a, #bbs #forum span {
+#yahoo-com #forum a, #yahoo-com #forum span {
  background: transparent url(/media/menu-pointer.gif) center -2px no-repeat;
 }
 h1,h2,h3,h4 {
@@ -353,7 +353,7 @@ hr {border: 0;width: 80%; height:1px;color:gray;background-color:gray;}
  color:#222 !important;
 }
 
-.paginator { padding:.5em .75em; float:left; font:normal 1em arial; }
+.paginator { padding: 5em 0 1em 0 !important; float:left; font:normal 1em arial;}
  
 .paginator .prev-na,
 .paginator .next-na {

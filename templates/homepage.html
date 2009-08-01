@@ -1,15 +1,8 @@
 {% extends "index.html" %}
 {%load i18n%}{%load logic%}{%load ls%}{%load comments%}{%load markup%}
 {%block meta%}
-{%if user.is_authenticated and not user.id|equal:object.id%}
-<link rel="stylesheet" type="text/css" href="/media/yui/button/assets/skins/sam/button.css" />
-<script type="text/javascript" src="/media/yui/yahoo/yahoo-min.js"></script>
-<script type="text/javascript" src="/media/yui/event/event-min.js"></script>
-<script type="text/javascript" src="/media/yui/connection/connection-min.js"></script>
-<script type="text/javascript" src="/media/yui/yahoo-dom-event/yahoo-dom-event.js"></script>
-<script type="text/javascript" src="/media/yui/element/element-beta.js"></script>
-<script type="text/javascript" src="/media/yui/button/button-min.js"></script>
-{%endif%}
+<script type="text/javascript" src="/media/jq/jquery.js"></script>
+
 {%if post%}{%include "highslide.htm"%}{%endif%}
 {%endblock%}
 
@@ -193,42 +186,37 @@
     <div class="clearer"><span></span></div>
   </div>
 </div>
-</div>{%if user.is_authenticated and not user.id|equal:object.id%}
-<script type="text/javascript">
-YAHOO.util.Event.onContentReady("rnote", function () {
-{%if user.attrs|key:"beats"|inlist:object.id%}var state='unsubscribe'
-{%else%}var state='subscribe'
-{%endif%};
+</div>
 
-function fail(){
+{% if user.is_authenticated and not user.id|equal:object.id %}
+<script type="text/javascript">
+$(document).ready(function(){
+{% if user.attrs|key:"beats"|inlist:object.id %}var state='unsubscribe'{% else %}var state='subscribe'{% endif %};
+function fail(msg){
 e = document.getElementById('subscription').parentNode;
 m = document.createElement('span');
 m.appendChild(document.createTextNode("{%trans "Something gone wrong. Try later."%}"));
 m.setAttribute("class", "error");
 e.appendChild(m);
 }
+$('#subs_markup').empty();
+$('#subs_markup').append('<span class="button"><span class="first-child"><button type="submit" id="sbtn">'+(state=='subscribe'?'{%trans "Subscribe"%}':'{%trans "Unsubscribe"%}')+'</button></span></span>');
+$('#sbtn').click(function(){
+ $.getJSON('/rpc/subscribe/', {'uid': '{{object.id}}'}, function(data, status){
+ if(data!='fail'&&data!='cannot'){
+   $('#sbtn').empty();
+   $('#sbtn').append(state=='subscribe'?'{%trans "Unubscribe"%}':'{%trans "Subscribe"%}');
+   state = (state=='subscribe'?'unsubscribe':'subscribe');
+ }else if(data=='cannot'){
+  fail('{%trans "Cannot subscribe to yourself"%}');
+ }else{
+   $('#sbtn').append(state=='subscribe'?'{%trans "Unubscribe"%}':'{%trans "Subscribe"%}');
+ }
+ });
+});
 
-function onSubs(e){
-sb.set('disabled', true);
+});
+</script>
+{%endif%}
 
-var callback = {
-success: function(o){
-result = o.responseXML.documentElement.getElementsByTagName('msg');
-if(result.length>0){
-if(result[0].firstChild.nodeValue=='success'){
-sb.set('label', state=='subscribe'?'{%trans "Unubscribe"%}':'{%trans "Subscribe"%}');
-state = state=="subscribe"?"unsubscribe":"subscribe";
-sb.set('disabled', false);
-}else{fail();return;}
-}else{fail();return;}
-},
-failure: function(o){fail();}
-}
-var conn = YAHOO.util.Connect.asyncRequest("GET", "/subscribe/?uid={{object.id}}&xhr=1", callback);
-YAHOO.util.Event.preventDefault(e);
-}
-
-var sb = new YAHOO.widget.Button({container:"subs_markup", id: "sbtn", label: state=='subscribe'?'{%trans "Subscribe"%}':'{%trans "Unsubscribe"%}', onclick: {fn: onSubs}});
-})
-</script>{%endif%}
 {% endblock %}

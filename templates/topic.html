@@ -3,14 +3,7 @@
 {%if user.is_authenticated%}{%load recaptcha%}{%endif%}
 {%block title%}{{post.title}}{%endblock%}
 {%block meta%}{%ifequal post.section "video"%}<script type="text/javascript" src="/media/swfobject.js"></script>{%endifequal%}
-<script type="text/javascript" src="/media/yui/yahoo/yahoo-min.js"></script>
-<script type="text/javascript" src="/media/yui/event/event-min.js"></script>
-<script type="text/javascript" src="/media/yui/connection/connection-min.js"></script>
-
-<link rel="stylesheet" type="text/css" href="/media/yui/button/assets/skins/sam/button.css" />
-<script type="text/javascript" src="/media/yui/yahoo-dom-event/yahoo-dom-event.js"></script>
-<script type="text/javascript" src="/media/yui/element/element-beta.js"></script>
-<script type="text/javascript" src="/media/yui/button/button-min.js"></script>
+<script type="text/javascript" src="/media/jq/jquery.js"></script>
 {%include "highslide.htm"%}
 <style type="text/css" media="screen">@import "/media/rating.css";</style>
 <style type="text/css" media="screen">
@@ -98,74 +91,39 @@ height="240" width="320">
 {% get_comment_count for post as comment_count %}
 {%if comment_count%}
 <h4 class="meta">{%trans "Comments"%}: {{comment_count}}</h4>{%endif%}
-<span id="votes">{%if post.rate_count%}{%trans "ratings"%}<b>:</b>&nbsp;{{post.rate_count}}{%endif%}&nbsp;</span>
+<span id="votes">{% if post.attrs|key:"votes" %}{%trans "ratings"%}<b>:</b>&nbsp;{{post.attrs|key:"votes"}}{%endif%}&nbsp;</span>
 <span class="rating"><span id="poor"><a href="#">( &gt;&lt;)</a></span>&nbsp;&nbsp;&nbsp;<span id="boring"><a href="#">(。_゜)</a></span>&nbsp;&nbsp;&nbsp;<span id="good"><a href="#">( ^_^)</a></span>&nbsp;&nbsp;&nbsp;<span id="cool"><a href="#">( ﾟ▽ﾟ)</a></span>&nbsp;&nbsp;&nbsp;<span id="awesome"><a href="#">Ｏ(≧∇≦)Ｏ</a></span></span>
 </div>
 </div>
 <script type="text/javascript">
-YAHOO.util.Event.onContentReady("markup", function () {
+$(document).ready(function(){
 var rates = {'poor': 1, 'boring': 2, 'good': 3, 'cool': 4, 'awesome': 5}
 var rrates = {1: 'poor', 2: 'boring', 3:'good', 4: 'cool', 5: 'awesome'}
-var data = "post={{post.id}}&rating=0";
 
-function rmas(k){
- item = document.getElementById(k);
- if(item){
-  as = item.getElementsByTagName('a')
-  if(as) {
-   txt = as[0].firstChild.nodeValue;
-   parent = as[0].parentNode;
-   parent.appendChild(document.createTextNode(txt))
-   parent.removeChild(as[0]);
-  }
-  YAHOO.util.Event.removeListener(k,'click');
- }
-}
-
-var callback = {
-success: function(o){
-var r = o.responseXML.documentElement.getElementsByTagName('rating');
-if(r.length >0){
-votes = parseInt(r[0].firstChild.nodeValue);
-if(votes==0){{%if not user.is_authenticated%}for(k in rates){rmas(k);}{%endif%}return;}
-avg = parseInt(r[0].getAttribute("avg"));
-document.getElementById("votes").firstChild.nodeValue = "{%trans "ratings"%}: "+votes;
-if(avg in [1,2,3,4,5]) {
- el = document.getElementById(rrates[avg]);
- el.setAttribute('class', 'chosen');
-}
+function vote(avg){
 for(k in rates){
-  if(rates[k]!=avg){document.getElementById(k).removeAttribute('class');}
-  else{ document.getElementById(k).setAttribute('class','chosen');}
- {%if post.author.attrs|key:"votes"|key:post.id%}
-  rmas(k);
- {%endif%}
-}
-}
-},
-failure: function(o){
-for(k in rates){
-  rmas(k);
-}
-}
+var smile = $('#'+k+' a').text();
+$('#'+k).empty();
+$('#'+k).append(smile);
+};
+if(avg in [1,2,3,4,5]) $('#'+rrates[avg]).addClass('chosen');
+return false;
 }
 
-function onRate(e){
-{%if user.is_authenticated and not post.author.attrs|key:"votes"|key:post.id%}
-data = "post={{post.id}}&rating="+(e?rates[YAHOO.util.Event.getTarget(e).parentNode.id]:0);
-var conn = YAHOO.util.Connect.asyncRequest("POST", "/rate/", callback, data);
-for(k in rates){rmas(k);}
-YAHOO.util.Event.preventDefault(e);
-{%else%}YAHOO.util.Event.preventDefault(e);
-{%endif%}
-}
-YAHOO.util.Event.on("poor", "click", onRate);
-YAHOO.util.Event.on("boring", "click", onRate);
-YAHOO.util.Event.on("good", "click", onRate);
-YAHOO.util.Event.on("cool", "click", onRate);
-YAHOO.util.Event.on("awesome", "click", onRate);
+$('.rating span a').click(function(){
+ $.getJSON('/rpc/rate/', {'post': '{{post.id}}', 'rating': rates[this.parentNode.id]}, function(data, status){
+  vote(data.avg);
+  $('#votes').empty();
+  $('#votes').append("{% trans "ratings" %}: "+data.votes);
+ });
+return false;
+});
 
-var conn = YAHOO.util.Connect.asyncRequest("POST", "/rate/", callback, data);
+{% if post.attrs|key:"avg"  %}
+$('#'+rrates[{{ post.attrs|key:"avg" }}]).addClass('chosen');
+{% endif %}
+
+{% if user.attrs|key:"votes"|key:post.id %}vote(0);{% endif %}
 
 hs.graphicsDir = '/media/';
 hs.outlineType = 'rounded-white';
@@ -174,11 +132,6 @@ hs.outlineType = 'rounded-white';
 
 
 {% get_comment_list for post as comment_list %}
-<script type="text/javascript">
-YAHOO.util.Event.onContentReady("commentform", function () {
-var bc = new YAHOO.widget.Button("preview_submit", { value: '{%trans "Preview"%}' });
-});
-</script>
 {%if comment_list%}<br><br>
 <div id="commentslist">
 <ul>{% for comment in comment_list %}
@@ -189,10 +142,10 @@ var bc = new YAHOO.widget.Button("preview_submit", { value: '{%trans "Preview"%}
 </div>{%endif%}
 
 <div id="commentform">
-<div {%if not post.attrs|key:"thanks"%} style="display:none;"{%endif%}>
+<div {%if not post.attrs|key:"thanks"%}style="display:none;"{% else %}style="display:inline;"{%endif%}>
 {%trans "Thanks"%}<b>:</b> <span id="tnx_v">&nbsp;{{post.attrs|key:"thanks"}}</span>
 </div>
-<div id="thxbtn"></div>
+<div id="thxbtn" style="display:inline;"></div><br><br>
 {% if not post.created|add_days:"60"|is_expired or not comment_count %}
 
 {% get_comment_form for post as form %}
@@ -204,7 +157,15 @@ var bc = new YAHOO.widget.Button("preview_submit", { value: '{%trans "Preview"%}
 <div style="clear:both;">{% recaptcha %}{%if msg%}<br><p class="error">{{msg}}</p>{%endif%}</div><br><br>
 
 <input type="hidden" name="target" value="/~{{post.author.username}}/{{post.slug}}/" />
-<div class="el"><br><input type="submit" id="preview_submit" name="post" value="{% trans "Leave comment" %}" /></div>
+<div class="el"><br>
+
+&nbsp;&nbsp;<span class="button"><span class="first-child">
+<button type="submit" id="preview_btn">{% trans "Preview" %}
+</button></span></span>
+&nbsp;<span class="button" id="comment_btn"><span class="first-child">
+<button type="submit">{% trans "Leave comment" %}</button></span></span>
+
+</div>
 {{form.content_type}}
 {{form.object_pk}}
 {{form.timestamp}}
@@ -277,14 +238,14 @@ var bc = new YAHOO.widget.Button("preview_submit", { value: '{%trans "Preview"%}
   </div>
 </div>
 </div>
-{%if user.is_authenticated and not user.id|equal:post.author.id%}
+{% if user.is_authenticated and not user.id|equal:post.author.id %}
 <script type="text/javascript">
-YAHOO.util.Event.onContentReady("rnote", function () {
-{%if user.attrs|key:"beats"|inlist:post.author.id%}var state='unsubscribe'
-{%else%}var state='subscribe'
-{%endif%};
+$(document).ready(function(){
+{% if user.attrs|key:"beats"|inlist:post.author.id %}var state='unsubscribe'
+{% else %}var state='subscribe'
+{% endif %};
 
-function fail(){
+function fail(msg){
 e = document.getElementById('subscription').parentNode;
 m = document.createElement('span');
 m.appendChild(document.createTextNode("{%trans "Something gone wrong. Try later."%}"));
@@ -292,26 +253,22 @@ m.setAttribute("class", "error");
 e.appendChild(m);
 }
 
-function onSubs(e){
-sb.set('disabled', true);
+$('#subs_markup').empty();
+$('#subs_markup').append('<span class="button"><span class="first-child"><button type="submit" id="sbtn">'+(state=='subscribe'?'{%trans "Subscribe"%}':'{%trans "Unsubscribe"%}')+'</button></span></span>');
+$('#sbtn').click(function(){
+ $.getJSON('/rpc/subscribe/', {'uid': '{{post.author.id}}'}, function(data, status){
+ if(data!='fail'&&data!='cannot'){
+   $('#sbtn').empty();
+   $('#sbtn').append(state=='subscribe'?'{%trans "Unubscribe"%}':'{%trans "Subscribe"%}');
+   state = (state=='subscribe'?'unsubscribe':'subscribe');
+ }else if(data=='cannot'){
+  fail('{%trans "Cannot subscribe to yourself"%}');
+ }else{
+   $('#sbtn').append(state=='subscribe'?'{%trans "Unubscribe"%}':'{%trans "Subscribe"%}');
+ }
+ });
+});
 
-var callback = {
-success: function(o){
-result = o.responseXML.documentElement.getElementsByTagName('msg');
-if(result.length>0){
-if(result[0].firstChild.nodeValue=='success'){
-sb.set('label', state=='subscribe'?'{%trans "Unubscribe"%}':'{%trans "Subscribe"%}');
-state = state=="subscribe"?"unsubscribe":"subscribe";
-sb.set('disabled', false);
-}else{fail();return;}
-}else{fail();return;}
-},
-failure: function(o){fail();}
-}
-var conn = YAHOO.util.Connect.asyncRequest("GET", "/subscribe/?uid={{post.author.id}}&xhr=1", callback);
-YAHOO.util.Event.preventDefault(e);
-}
-var sb = new YAHOO.widget.Button({container:"subs_markup", id: "sbtn", label: state=='subscribe'?'{%trans "Subscribe"%}':'{%trans "Unsubscribe"%}', onclick: {fn: onSubs}});
 {%if not user.attrs|key:"thanks"|inlist:post.id%}
 function rmtnxbtn(){
 torm = document.getElementById("thxbtn");
@@ -340,7 +297,16 @@ failure: function(o){rmtnxbtn();}
 var conn = YAHOO.util.Connect.asyncRequest("GET", "/tnx/{{post.id}}/", tcallback);
 }
 
-var tnx = new YAHOO.widget.Button({container:"thxbtn", id: "tnxbtn", label: "{%trans "Thanks"%}", onclick: {fn: onTnx}});
+$('#thxbtn').append('&nbsp;&nbsp;<span class="button"><span class="first-child"><button type="submit">"{%trans "Thanks"%}"</button></span></span><br><br>');
+$('#thxbtn').click(function(){
+$('#thxbtn').remove();
+ $.getJSON('/rpc/tnx/', {'the_id': '{{post.id}}'}, function(data, status){
+  if(data!='fail'){
+  $('#tnx_v').empty();
+  $('#tnx_v').append(data);
+  }
+ });
+});
 {%endif%}
 })
 </script>{%endif%}

@@ -11,7 +11,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
+DATABASE_ENGINE = ''           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
 DATABASE_NAME = ''             # Or path to database file if using sqlite3.
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
@@ -63,6 +63,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.doc.XViewMiddleware',
+    'board.middleware.threadlocals.ThreadLocals',
+    # These are optional
+    'board.middleware.ban.IPBanMiddleware',
+    'board.middleware.ban.UserBanMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -71,12 +75,12 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/home/grey/src/df/templates",
+    os.path.join(os.path.dirname(__file__), 'templates')
 )
 
 INSTALLED_APPS = (
     'django.contrib.auth',
-#    'django.contrib.admin',
+    'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
@@ -87,16 +91,16 @@ INSTALLED_APPS = (
     'tagging',
     'fs',
     'contacts',
-    'admin',
     'board',
     'tracker',
     'stats',
     'transcoding',
+    'board',
 )
 
 FTP_HOMEDIR = '/mnt/dfs'
 #must be writable by www server
-OPENID_STORE_ROOT = '/home/grey/src/df/store'
+OPENID_STORE_ROOT = os.path.join(os.path.dirname(__file__), 'store')
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'users.util.EmailBackend',
@@ -117,7 +121,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.i18n',
     'context_processors.global_tracker_settings',
 )
-CACHE_BACKEND = 'file:///home/grey/src/df/store/cache'
+CACHE_BACKEND = 'file://%s'%os.path.join(os.path.dirname(__file__), 'store', 'cache')
 RESULTS_ON_PAGE = 50
 ORPHANS = 5
 BBS_RESULTS_ON_PAGE = 80
@@ -161,7 +165,7 @@ SEARCH_CRAWLERS = (
 SITE_DOMAIN = '0xdf.net'
 SITE_NAME = '0xdf'
 
-FILE_UPLOAD_TEMP_DIR = '/home/grey/src/df/store/temp'
+FILE_UPLOAD_TEMP_DIR = os.path.join(os.path.dirname(__file__), 'store', 'temp')
 
 OPEN_TRACKER = True
 SOLR_URL = 'http://127.0.0.1:8080/solr/'

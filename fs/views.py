@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.http import require_http_methods
 from django.template import RequestContext
 from django.core.paginator import QuerySetPaginator, Paginator, InvalidPage
+from django.utils import simplejson
 
 from tracker.models import Torrent
 from fs.models import *
@@ -13,7 +14,7 @@ from fs.forms import *
 from fs.util import sort_result
 from users.forms import AuthForm
 from users.views import login_required
-from utils import HttpResponseRedirect, get_page
+from utils import HttpResponseRedirect, get_page, get_var
 from settings import FTP_HOMEDIR, RESULTS_ON_PAGE, RECAPTCHA_PUB_KEY, RECAPTCHA_PRIVATE_KEY, MEDIA_ROOT, DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, NUMBER_OF_POSTS_PER_DAY, MEMCACHE, ORPHANS, OPEN_TRACKER
 
 @require_http_methods('GET')
@@ -158,32 +159,13 @@ def new(request):
 	    'form': form,
 	}, context_instance=RequestContext(request))
 
-def _fail(msg=''):
-    r = HttpResponse(mimetype="text/xml")
-    r.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-    if msg:
-	r.write("<list><msg>%s</msg></list>"%msg)
-    else:
-	r.write("<list><msg>failure</msg></list>")
-    return r
-
-@require_http_methods('GET')
-def xml_tags(request, section, page=0):
+def rpc_tags(request, section):
     from tagging.models import Tag
-    tag_list = Tag.objects.usage_for_model(Topic, filters=dict(section=section), counts=True)
+    tag_list = Tag.objects.usage_for_model(Topic,
+	filters=dict(section=section), counts=True)
     if not tag_list:
-	return _fail()
-    result = Paginator(tag_list, 30, 10)
-    if not page and result.num_pages >0:
-	page = result.num_pages
-    try:
-	r = result.page(int(page))
-    except InvalidPage, ValueError:
-	return _fail()
-    return render_to_response('tags.xml', {
-	'result': r,
-	'page': page,
-    }, mimetype = "text/xml")
+	tag_list = []
+    return HttpResponse(simplejson.dumps([t.name for t in tag_list]))
 
 @require_http_methods('POST')
 def comment(request):
@@ -197,24 +179,22 @@ def comment(request):
 	    return post_comment(request, request.POST['target'])
     return HttpResponseBadRequest("cannot recognize this form")
 
-@require_http_methods('POST')
 def rate(request):
-    def fallback():
-	return render_to_response('rating.xml', {
-	    'votes': 0,
-	    'rating': 0,
-	}, mimetype = "text/xml")
-    try:
-	post, rate = request.POST['post'], request.POST['rating']
-    except KeyError:
-	return fallback()
+    def nothing():
+	return HttpResponse(simplejson.dumps({'votes': 0, 'rating': 0}))
+
+    post = get_var(request, 'post', None)
+    rate = get_var(request, 'rating', None)
+    if not post or not rate:
+	return nothing()
     try:
 	post = int(post)
 	rate = int(rate)
     except ValueError:
-	return fallback()
+	return nothing()
+
     post = Topic.objects.filter(pk=post)
-    if not post: return fallback()
+    if not post: return nothing()
     post = post[0]
     post.add_rate(rate)
     votes = 0
@@ -223,10 +203,7 @@ def rate(request):
     avg = 0
     if post.attrs.has_key('avg'):
 	avg = post.attrs['avg']
-    return render_to_response('rating.xml', {
-	    'votes': votes,
-	    'avg': avg,
-	}, mimetype = "text/xml")
+    return HttpResponse(simplejson.dumps({'votes': votes, 'avg': avg}))
 
 @require_http_methods('GET')
 def search(request):
@@ -300,29 +277,22 @@ def get_torrent(request, the_id):
     return response
 
 @login_required
-@require_http_methods('GET')
-def subscribtion(request):
+def rpc_subscribtion(request):
     from django.contrib.auth.models import User
     from django.core.exceptions import ValidationError
-    r = HttpResponse(mimetype="text/xml")
-    r.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-    if request.GET.has_key('uid'):
+    uid = get_var(request, 'uid', None)
+    tags = get_var(request, 'tags', None)
+    if uid:
 	try:
-	    uid = int(request.GET['uid'])
+	    uid = int(uid)
 	except ValueError:
-	    if request.GET.has_key('xhr'):
-		return _fail()
-    	    raise Http404("No such user")
+	    return HttpResponse('"fail"')
 	user = User.objects.filter(pk=uid)
 	if not user:
-	    if request.GET.has_key('xhr'):
-		return _fail()
-    	    raise Http404("No such user")
+	    return HttpResponse('"fail"')
 	user = user[0]
 	if user.id == request.user.id:
-	    if request.GET.has_key('xhr'):
-		return _fail()
-    	    raise Http404("You cannot subscribe to yourself")
+	    return HttpResponse('"cannot"') #subscribe to yourself
 	if request.user.attrs.has_key('beats'):
 	    if uid in request.user.attrs['beats']:
 		a = request.user.attrs['beats']
@@ -357,45 +327,39 @@ def subscribtion(request):
 	    subs = Subscription(user=request.user)
 	    subs.save()
 	    subs.beats.add(user)
-	r.write("<result><msg>success</msg></result>")
-	return r
-    elif request.POST.has_key('tags'):
+	return HttpResponse('"success"')
+    elif tags:
 	from tagging.validators import isTagList
 	from tagging.models import TaggedItem
 	try:
-	    isTagList(request.POST['tags'], {})
+	    isTagList(tags, {})
 	except ValidationError:
-	    if request.POST.has_key('xhr'):
-		return _fail()
-	    return HttpResponseForbidden("Seems you've supplied tags in improper format")
+	    return HttpResponse('"fail"')
 	item = Subscription.objects.filter(user=request.user)
 	if not item:
 	    item = Subscription(user=request.user)
 	    item.save()
 	else: item = item[0]
-	item.tags = '%s%s'%(''.join(['%s, '%tag.name for tag in item.tags]), request.POST['tags'])
-    r.write("<result><msg>success</msg></result>")
-    return r
+	item.tags = '%s%s'%(''.join(['%s, '%tag.name for tag in item.tags]), tags)
+    return HttpResponse('"success"')
 
 @login_required
-@require_http_methods('GET')
-def tnx(request, the_id):
+def tnx(request):
     tnx = request.user.attrs.get('thanks', [])
-    if the_id in tnx:
-	return _fail()
+    the_id = get_var(request, 'the_id', 0)
+    if not the_id or the_id in tnx:
+	return HttpReponse('"fail"')
     t = Topic.objects.filter(pk=the_id)
     if not t:
-	return _fail()
+	return HttpReponse('"fail"')
     t = t[0]
     t.attrs['thanks'] = t.attrs.get('thanks', 0) + 1
     t.save()
     tnx.append(t.id)
     request.user.attrs['thanks'] = tnx
     request.user.save()
-    r = HttpResponse(mimetype="text/xml")
-    r.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-    r.write("<result><msg>success</msg><number>%s</number></result>"%t.attrs.get('thanks', 0))
-    return r
+    return HttpResponse(t.attrs['thanks'])
+
 
 @require_http_methods('GET')
 def tags(request, tag=None):

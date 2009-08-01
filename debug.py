@@ -1,5 +1,5 @@
-def log(s):
-    f = open('/tmp/log', 'w')
+def log(s, m='w'):
+    f = open('/tmp/log', m)
     f.write('%s\n'%s)
     f.close()
 

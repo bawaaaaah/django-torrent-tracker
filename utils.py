@@ -1,7 +1,6 @@
 # coding=UTF-8
 import re, os, sys
 from types import UnicodeType
-import magic
 import unicodedata
 import string
 from django.utils.translation import ugettext_lazy as _
@@ -188,3 +187,7 @@ def get_page(page, q):
 	raise Http404("No such page")
     return q
  
+def get_var(request, var_name, default=None):
+    return request.POST.get(var_name, request.GET.get(var_name, 
+        request.META.get(var_name, default)))
+

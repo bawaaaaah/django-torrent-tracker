@@ -1,0 +1,35 @@
+<VirtualHost *>
+    ServerName example.com
+    ServerAdmin admin@examle.com
+    ErrorLog /var/log/apache2/example-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog /var/log/apache2/example-access.log combined
+    ServerSignature On
+
+    AddHandler flv-stream .flv
+    Alias /media/ "/home/example/tracker/media/"
+    <Directory "/home/example/tracker/media/">
+	Order allow,deny
+	Allow from all
+	Options -Indexes
+    </Directory>
+
+    WSGIScriptAlias / "/home/example/tracker/df.wsgi"
+
+## mod_python
+#    <Location "/">
+#        PythonPath "['/home/example/tracker/'] + sys.path"
+#        SetHandler python-program
+#        PythonHandler django.core.handlers.modpython
+#        SetEnv DJANGO_SETTINGS_MODULE settings
+#	PythonInterpreter df
+#        PythonDebug On
+#    </Location>
+
+LimitRequestBody 5242880
+
+</VirtualHost>

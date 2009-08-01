@@ -242,11 +242,12 @@ class Topic(models.Model):
     def add_rate(self, value):
 	if value == 0: return
 	if self.author.attrs.has_key('votes'):
-	    if self.author.attrs['votes'].has_key(self.id):
+	    votes = self.author.attrs.get('votes', {})
+	    if not votes.has_key(self.id):
+		votes.update({self.id: value})
+	    else:
 		return
-	    v = self.author.attrs['votes']
-	    v.update({self.id: value})
-	    self.author.attrs['votes'] = v
+	    self.author.attrs['votes'] = votes
 	else:
 	    self.author.attrs['votes'] = {self.id: value}
 	self.author.save()
@@ -272,7 +273,7 @@ class Topic(models.Model):
 	return mark_safe(result)
     
     def save(self):
-	self.slug=slughifi(self.title)
+	self.slug = slughifi(self.title)
 	if not re.sub('\s+-', '', self.slug) or len(self.slug) > 50:
 	    self.slug = genslug()
 	self.slug = self.slug.replace(' ', '-')

@@ -65,7 +65,7 @@ img {border: 0;}
 {%if user.image%}<p style="padding:1em 0 0 9em;float:left;display:inline;margin: 1em 1em 1em 0;" class="imageleft">
 <a class="highslide" href="/media/avatar/{{user.image}}" onclick="return hs.expand(this)">
 <img title="{{user.name}}" src="/media/iavatar/{{user.image}}"></a></p>{%endif%}
-<br><br><h3>{{ user.name }}</h3><br><br><br><br>
+<br><br><br><br><br><br>
 <form action="/self/openid/" id="openidform" method="post" class="block">
   <div class="row"><label for="id_openid_url">{{ openid.openid_url.label }}<b>:</b>
   {% if openid.openid_url.errors %}<br><span class="error">{{ openid.openid_url.errors|join:", " }}</span>{% endif %}</label>
