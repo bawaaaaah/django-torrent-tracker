@@ -3,13 +3,13 @@
     {% if user.is_authenticated %}
         <p>
 	{# TODO: The next line used to be in a blocktrans before using the url tag #}
-	    {% trans "You are signed in as" %} <a href="/self/">{{ user.username }}</a>
+	    {% trans "You are signed in as" %} <a href="/bbs/settings/">{{ user.username }}</a>
             {% if user.is_staff %}
             <b>{% trans "(STAFF)" %}</b>
             {% endif %}
         </p>
         <br />
-	<p><a href="{{ LOGOUT_URL }}">{% trans "Sign out" %}</a></p>
+	<p><a href="/logout/">{% trans "Sign out" %}</a></p>
     {% else %}
         <p>{% trans "You are not logged in." %}</p>
         <br />
@@ -21,7 +21,7 @@
         <br /><br /><br /><br />
 
         <p>{% trans "You need to have a user account in order to contribute to discussions on this forum." %}</p>
-        <p style="font-size:small"><a href="/signup/">{% trans "Create an account" %}</a></p>
+        <p style="font-size:small"><a href="/accounts/register/">{% trans "Create an account" %}</a></p>
     {% endif %}
 </div>
 
@@ -32,10 +32,10 @@
     <br />
     <ul>
         <li>&#187; <b><a href="/admin/">{% trans "Admin Site" %}</a></b></li>
-        <li>&#187; <a href="/admin/board/post/?censor__exact=1">{% trans "Censored posts" %}</a></li>
-        <li>&#187; <a href="/admin/board/abusereport/">{% trans "Abuse Reports" %}</a></li>
-        <li>&#187; <a href="/admin/board/thread/?csticky__exact=1">{% trans "Category Sticky" %}</a></li>
-        <li>&#187; <a href="/admin/board/thread/?gsticky__exact=1">{% trans "Global Sticky" %}</a></li>
+        <li>&#187; <a href="/admin/snapboard/post/?censor__exact=1">{% trans "Censored posts" %}</a></li>
+        <li>&#187; <a href="/admin/snapboard/abusereport/">{% trans "Abuse Reports" %}</a></li>
+        <li>&#187; <a href="/admin/snapboard/thread/?csticky__exact=1">{% trans "Category Sticky" %}</a></li>
+        <li>&#187; <a href="/admin/snapboard/thread/?gsticky__exact=1">{% trans "Global Sticky" %}</a></li>
     </ul>
     </div>
 {% endif %}

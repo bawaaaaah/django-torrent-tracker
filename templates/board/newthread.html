@@ -4,7 +4,7 @@
 {% block snapboard_main %}
     {% if user.is_authenticated %}
     <form action="" method="POST" id="add_post_div">
-        <script type="text/javascript" src="{{ SNAP_MEDIA_PREFIX }}/js/yui/autocomplete-min.js"></script>
+        <script type="text/javascript" src="/media/yui/autocomplete-min.js"></script>
         <div id="toolbar" style="">
             {% ifequal SNAP_POST_FILTER "markdown" %}
                 <button onclick="return surround('**');"><b>{% trans "B" %}</b></button>

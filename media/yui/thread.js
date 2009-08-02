@@ -139,14 +139,14 @@ function toggle_variable(action, oclass, oid, msgdivid) {
 }
 
 // thread level functions
-function set_csticky(id) { toggle_variable('csticky', 'thread', id, 'thread_rpc_feedback'); }
-function set_gsticky(id) { toggle_variable('gsticky', 'thread', id, 'thread_rpc_feedback'); }
-function set_watch(id) { toggle_variable('watch', 'thread', id, 'thread_rpc_feedback'); }
-function set_close(id) { toggle_variable('close', 'thread', id, 'thread_rpc_feedback'); }
+function set_csticky(id) { toggle_variable('csticky', 'thread', id, 'thread_rpc_feedback'); return false;}
+function set_gsticky(id) { toggle_variable('gsticky', 'thread', id, 'thread_rpc_feedback'); return false;}
+function set_watch(id) { toggle_variable('watch', 'thread', id, 'thread_rpc_feedback'); return false;}
+function set_close(id) { toggle_variable('close', 'thread', id, 'thread_rpc_feedback'); return false;}
 
 // post level function
-function set_censor(id) { toggle_variable('censor', 'post', id, ('post_rpc_feedback' + id));}
-function set_abuse(id) { toggle_variable('abuse', 'post', id, ('post_rpc_feedback' + id));}
+function set_censor(id) { toggle_variable('censor', 'post', id, ('post_rpc_feedback' + id)); return false;}
+function set_abuse(id) { toggle_variable('abuse', 'post', id, ('post_rpc_feedback' + id)); return false;}
 
 // get the source text of a message to quote it
 function get_post_to_quote(id, cb) {
