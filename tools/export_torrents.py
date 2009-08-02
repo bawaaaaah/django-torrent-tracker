@@ -2,7 +2,7 @@
 import sys
 import os
 import base64
-sys.path.append('/home/grey/src/df')
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from fs.models import Topic
 from tracker.models import Torrent
 from benc import bdecode, bencode

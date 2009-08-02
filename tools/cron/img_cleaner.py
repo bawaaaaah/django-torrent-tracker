@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # removes images  which not belong to any post
 import sys, os
-sys.path.append('/home/grey/src/df')
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from fs.models import Topic
 from board.models import Post
 from settings import MEDIA_ROOT

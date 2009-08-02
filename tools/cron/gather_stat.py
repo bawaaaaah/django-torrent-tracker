@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import sys, os
-sys.path.append('/home/grey/src/df')
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from fs.models import Topic, SECTIONS, AKINDS, BKINDS, GKINDS, MKINDS, OKINDS, PKINDS, TKINDS
 from stats.models import Sections
 

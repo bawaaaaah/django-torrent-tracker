@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # removes users which authenticated by openid and have no posts
 import sys
-sys.path.append('/home/grey/src/df')
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from users.models import User
 user_lst = User.objects.all()
 for u in user_lst:

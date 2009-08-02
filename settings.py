@@ -6,15 +6,15 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Dorian Grey', 'grey@0x2a.com.ua'),
+    ('NoOne', 'noone@example.com'),
 )
 
 MANAGERS = ADMINS
 
-DATABASE_ENGINE = ''           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-DATABASE_NAME = ''             # Or path to database file if using sqlite3.
-DATABASE_USER = ''             # Not used with sqlite3.
-DATABASE_PASSWORD = ''         # Not used with sqlite3.
+DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
+DATABASE_NAME = 'df'             # Or path to database file if using sqlite3.
+DATABASE_USER = 'grey'             # Not used with sqlite3.
+DATABASE_PASSWORD = 'alibsedo'         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
 DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
@@ -175,3 +175,5 @@ SOLR_URL = 'http://127.0.0.1:8080/solr/'
 # * all new posts will not appear on first page if not approved
 
 CENSORSHIP = False
+
+CONTACT_FORM_EMAIL = 'noone@example.com'

@@ -1,6 +1,8 @@
 from django import forms
 from django.core.mail import send_mail, BadHeaderError
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
+
 from utils import HttpResponseRedirect
 
 attrs_dict = { 'class': 'textfield' }
@@ -12,7 +14,7 @@ class ContactForm(forms.Form):
 
     def save(self):
 	try:
-	    send_mail(self.cleaned_data['subject'], self.cleaned_data['body'], self.cleaned_data['email'], ['grey@0x2a.com.ua'], fail_silently=False)
+	    send_mail(self.cleaned_data['subject'], self.cleaned_data['body'], self.cleaned_data['email'], [settings.CONTACT_FORM_EMAIL], fail_silently=False)
 	except BadHeaderError:
 	    return HttpResponse('Invalid header found.')
 	return HttpResponseRedirect('/contact/thanks/')

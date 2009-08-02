@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
-sys.path.append('/home/grey/src/df')
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
 import cmemcache as memcache
 from settings import MEMCACHE, MIN_ANNOUNCE_INTERVAL
 import datetime
